@@ -32,7 +32,7 @@ object Logging {
             init(loggable.logOwner)
         }
         return logCache.get(loggable::class.java, {
-            KotlinLogging.logger("${logNames[loggable.logOwner]}/${loggable::class.java.name}")
+            KotlinLogging.logger("${logNames[loggable.logOwner]}/${loggable::class.java.simpleName}")
         })
     }
 

@@ -10,11 +10,20 @@ import de.btobastian.javacord.entities.permissions.impl.ImplPermissionsBuilder
 import de.btobastian.javacord.listener.Listener
 import de.btobastian.javacord.utils.ThreadPool
 import de.btobastian.javacord.utils.ratelimits.RateLimitManager
+import kaddy.plugin.SimplePluginManager
+import kaddy.util.KaddyLoggable
+import kaddy.util.LogOwner
+import kaddy.util.Loggable
+import kaddy.util.Logging
+import mu.KLogger
 import java.awt.image.BufferedImage
 import java.util.concurrent.Future
 
-internal class KaddyImpl(private val api: ImplDiscordAPI) : Kaddy {
+internal class KaddyImpl(internal val api: ImplDiscordAPI) : Kaddy, Loggable by KaddyLoggable {
 
+    override val logger: KLogger
+        get() = Logging.getLogger(this)
+    override val pluginManager = SimplePluginManager(this)
     override var game: String?
         get() = api.game
         set(value) { api.game = value }
@@ -70,4 +79,7 @@ internal class KaddyImpl(private val api: ImplDiscordAPI) : Kaddy {
     override fun registerListener(listener: Listener) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override val logOwner: Class<out LogOwner>
+        get() = KaddyLoggable.logOwner
 }
