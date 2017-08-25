@@ -2,10 +2,18 @@ package kaddy.plugin.java
 
 import com.typesafe.config.ConfigFactory
 import kaddy.Kaddy
+import kaddy.event.Event
+import kaddy.event.EventException
+import kaddy.event.EventHandler
+import kaddy.event.Listener
 import kaddy.plugin.*
+import kaddy.util.fullName
 import kaddy.util.use
 import java.io.File
 import java.io.FileNotFoundException
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
+import java.util.HashSet
 import java.util.Scanner
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -159,5 +167,111 @@ internal class JavaPluginLoader(private val kaddy: Kaddy) : PluginLoader {
                 }
             }
         }
+    }
+
+    private fun getMethods(listenerClass: Class<out Listener>): Set<Method> {
+        val methods: MutableSet<Method>
+
+        val publicMethods = listenerClass.getMethods()
+        val privateMethods = listenerClass.getDeclaredMethods()
+
+        methods = HashSet(publicMethods.size + privateMethods.size, 1.0f)
+
+        for (method in publicMethods) {
+            methods.add(method)
+        }
+        for (method in privateMethods) {
+            methods.add(method)
+        }
+
+        return methods
+    }
+
+    private fun checkMethod(method: Method, listenerClass: Class<out Listener>, plugin: Plugin): MethodHandler? {
+        val eventHandler = method.getAnnotation(EventHandler::class.java) ?: return null
+
+        if (method.isBridge || method.isSynthetic) {
+            return null
+        }
+
+        val checkClass: Class<*>? = if (method.parameterTypes.size == 1) {
+            method.parameterTypes[0]
+        } else {
+            null
+        }
+        if (checkClass == null || !Event::class.java.isAssignableFrom(checkClass)) {
+            plugin.logger.error("${plugin.fullName} attempted to register an invalid EventHandler method " +
+                    "signature \"${method.toGenericString()}\" in ${listenerClass}")
+            return null
+        }
+
+        val eventClass = checkClass.asSubclass(Event::class.java)
+        return MethodHandler(method, eventHandler, eventClass)
+    }
+
+    private class MethodHandler(val method: Method, val eventHandler: EventHandler, val eventClass: Class<out Event>) {
+        init {
+            method.isAccessible = true
+        }
+    }
+
+    override fun createRegisteredListeners(listener: Listener, plugin: Plugin):
+            Map<Class<out Event>,Set<RegisteredListener>> {
+
+        val ret = mutableMapOf<Class<out Event>, MutableSet<RegisteredListener>>()
+        val methods: Set<Method>
+
+        val listenerClass = listener::class.java
+
+        try {
+            methods = getMethods(listenerClass)
+        } catch (e: NoClassDefFoundError) {
+            plugin.logger.error(e) { "Plugin ${plugin.fullName} has failed to register events for $listenerClass " +
+                "because ${e.message} does not exist." }
+            return ret
+        }
+
+
+        for (method in methods) {
+            val mh = checkMethod(method, listenerClass, plugin) ?: continue
+
+            var eventSet: MutableSet<RegisteredListener>? = ret[mh.eventClass]
+            if (eventSet == null) {
+                eventSet = HashSet()
+                ret.put(mh.eventClass, eventSet)
+            }
+
+            var clazz: Class<*>? = mh.eventClass
+            while (Event::class.java.isAssignableFrom(clazz)) {
+                // This loop checks for extending deprecated events
+                if (clazz?.getAnnotation(Deprecated::class.java) != null) {
+                    plugin.logger.warn { "\"${plugin.fullName}\" has registered a listener for ${clazz?.name} on " +
+                            "method \"${method.toGenericString()}\", but the event is Deprecated. Please notify the " +
+                            "authors ${plugin.description.authors}." }
+                    break
+                }
+                clazz = clazz?.superclass
+            }
+
+            val executor = object : EventExecutor {
+                @Throws(EventException::class)
+                override fun execute(listener: Listener, event: Event) {
+                    try {
+                        if (!mh.eventClass.isAssignableFrom(event::class.java)) {
+                            return
+                        }
+                        method.invoke(listener, event)
+                    } catch (e: InvocationTargetException) {
+                        throw EventException(e.cause)
+                    } catch (t: Throwable) {
+                        throw EventException(t)
+                    }
+
+                }
+            }
+            val eh = mh.eventHandler
+            eventSet.add(RegisteredListener(listener, executor, eh.priority, plugin, eh.ignoreCancelled))
+        }
+        return ret
     }
 }

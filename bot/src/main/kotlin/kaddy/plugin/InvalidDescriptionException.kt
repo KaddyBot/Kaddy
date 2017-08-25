@@ -1,4 +1,4 @@
 package kaddy.plugin
 
-class InvalidDescriptionException(message: CharSequence? = null, cause: Throwable? = null)
-    : Exception(message.toString(), cause)
+class InvalidDescriptionException(message: String? = null, cause: Throwable? = null)
+    : Exception(message, cause)

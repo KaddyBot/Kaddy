@@ -2,6 +2,9 @@ package kaddy.plugin
 
 import com.google.common.io.Files
 import kaddy.Kaddy
+import kaddy.event.Event
+import kaddy.event.HandlerList
+import kaddy.event.Listener
 import kaddy.util.Loggable
 import kaddy.util.KaddyLoggable
 import kaddy.util.logger
@@ -105,6 +108,91 @@ class SimplePluginManager(private val kaddy: Kaddy) : PluginManager, Loggable by
     }
 
     override fun disablePlugin(plugin: Plugin) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (plugin.isEnabled) {
+            try {
+                plugin.pluginLoader.disablePlugin(plugin)
+            } catch (e: Throwable) {
+                logger.error(e) { "Error occurred (in the plugin loader) while disabling " +
+                        "${plugin.description.fullName} (Is it up to date?)" }
+            }
+
+            // TODO unregister listeners
+        }
+    }
+
+    override fun callEvent(event: Event) {
+        fireEvent(event)
+    }
+
+    private fun fireEvent(event: Event) {
+        val handlers = event.handlers
+        val listeners = handlers.registeredListeners
+
+        for (registration in listeners) {
+            if (registration.plugin.isNotEnabled) {
+                continue
+            }
+
+            try {
+                registration.callEvent(event)
+            }
+//            catch (e: AuthorNagException) {
+//                val plugin = registration.plugin
+//
+//                if (plugin.isNaggable()) {
+//                    plugin.setNaggable(false)
+//
+//                    server.getLogger().log(Level.SEVERE, String.format(
+//                            "Nag author(s): '%s' of '%s' about the following: %s",
+//                            plugin.description.authors,
+//                            plugin.getDescription().getFullName(),
+//                            e.getMessage()
+//                    ))
+//                }
+//            }
+            catch (e: Throwable) {
+                logger.error(e) { "Could not pass event ${event.eventName} to " +
+                        registration.plugin.description.fullName }
+            }
+
+        }
+    }
+
+    override fun registerEvents(listener: Listener, plugin: Plugin) {
+        if (plugin.isNotEnabled) {
+            throw IllegalPluginAccessException("Plugin attempted to register $listener while not enabled")
+        }
+
+        for (entry in plugin.pluginLoader.createRegisteredListeners(listener, plugin).entries) {
+            getEventListeners(getRegistrationClass(entry.key)).registerAll(entry.value)
+        }
+    }
+
+    private fun getEventListeners(type: Class<out Event>): HandlerList {
+        try {
+            val method = getRegistrationClass(type).getDeclaredMethod("getHandlerList")
+            method.isAccessible = true
+            return method.invoke(null) as HandlerList
+        } catch (e: Exception) {
+            throw IllegalPluginAccessException(e.toString())
+        }
+
+    }
+
+    private fun getRegistrationClass(clazz: Class<out Event>): Class<out Event> {
+        try {
+            clazz.getDeclaredMethod("getHandlerList")
+            return clazz
+        } catch (e: NoSuchMethodException) {
+            return if (clazz.superclass != null
+                    && clazz.superclass != Event::class.java
+                    && Event::class.java.isAssignableFrom(clazz.superclass)) {
+                getRegistrationClass(clazz.superclass.asSubclass(Event::class.java))
+            } else {
+                throw IllegalPluginAccessException("Unable to find handler list for event ${clazz.name}. Static" +
+                        " getHandlerList method required!")
+            }
+        }
+
     }
 }

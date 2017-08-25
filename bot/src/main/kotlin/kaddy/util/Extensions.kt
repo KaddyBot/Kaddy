@@ -1,5 +1,7 @@
 package kaddy.util
 
+import kaddy.plugin.Plugin
+
 inline fun <T : AutoCloseable, R> T.use(block: (T) -> R): R {
     var closed = false
     try {
@@ -18,3 +20,6 @@ inline fun <T : AutoCloseable, R> T.use(block: (T) -> R): R {
         }
     }
 }
+
+inline internal val Plugin.fullName
+    get() = this.description.fullName

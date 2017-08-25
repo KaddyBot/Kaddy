@@ -1,5 +1,7 @@
 package kaddy.plugin
 
+import kaddy.event.Event
+import kaddy.event.Listener
 import java.io.File
 
 interface PluginLoader {
@@ -45,4 +47,14 @@ interface PluginLoader {
      * @param plugin Plugin to disable.
      */
     fun disablePlugin(plugin: Plugin)
+
+    /**
+     * Creates and returns registered listeners for the event classes used in
+     * this listener
+     *
+     * @param listener The object that will handle the eventual call back
+     * @param plugin The plugin to use when creating registered listeners
+     * @return The registered listeners.
+     */
+    fun createRegisteredListeners(listener: Listener, plugin: Plugin): Map<Class<out Event>, Set<RegisteredListener>>
 }

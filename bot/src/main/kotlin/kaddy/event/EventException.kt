@@ -1,0 +1,3 @@
+package kaddy.event
+
+class EventException(cause: Throwable? = null, message: CharSequence? = null) : Exception(message.toString(), cause)
