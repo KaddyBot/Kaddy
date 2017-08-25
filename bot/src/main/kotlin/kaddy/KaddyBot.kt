@@ -1,13 +1,14 @@
 package kaddy
 
 import ch.qos.logback.classic.Level
+import de.btobastian.javacord.ImplDiscordAPI
 import de.btobastian.javacord.Javacord
 import kaddy.util.LogOwner
 import kaddy.util.Logging
 import kaddy.util.logger
 import java.util.Scanner
 
-class KaddyBot(token: String) : LogOwner {
+class KaddyBot(private val discordAPI: ImplDiscordAPI) : LogOwner, Kaddy by KaddyImpl(discordAPI) {
 
     companion object {
 
@@ -17,7 +18,8 @@ class KaddyBot(token: String) : LogOwner {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            val bot = KaddyBot(args[0])
+
+            val bot = KaddyBot(Javacord.getApi(args[0], true) as ImplDiscordAPI)
 
             bot.connect()
 
@@ -36,16 +38,13 @@ class KaddyBot(token: String) : LogOwner {
         Logging.setRootLogLevel(Level.TRACE)
     }
 
-
-    val discordAPI = DiscordAPI(Javacord.getApi(token, true))
-
-    fun connect() {
+    private fun connect() {
         logger.info { "Connecting bot..." }
-        discordAPI.internalAPI.connectBlocking()
+        discordAPI.connectBlocking()
         logger.info { "Bot connected to Discord!" }
     }
 
-    fun disconnect() {
-        discordAPI.internalAPI.disconnect()
+    private fun disconnect() {
+        discordAPI.disconnect()
     }
 }
