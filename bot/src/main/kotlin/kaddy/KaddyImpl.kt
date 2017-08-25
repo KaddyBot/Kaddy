@@ -76,10 +76,6 @@ internal class KaddyImpl(internal val api: ImplDiscordAPI) : Kaddy, Loggable by 
     override fun createPermissionsBuilder(permissions: Permissions?): PermissionsBuilder
             = if (permissions == null) ImplPermissionsBuilder() else ImplPermissionsBuilder(permissions)
 
-    override fun registerListener(listener: Listener) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override val logOwner: Class<out LogOwner>
         get() = KaddyLoggable.logOwner
 }

@@ -102,13 +102,6 @@ interface Kaddy : LogOwner {
     fun getUser(userId: CharSequence): Future<User>
 
     /**
-     * Registers a listener.
-     *
-     * @param listener The listener to register.
-     */
-    fun registerListener(listener: Listener)
-
-    /**
      * Gets a message by its id.
      *
      * This function may return null even if the message exists!

@@ -9,7 +9,7 @@ import kaddy.util.Logging
 import java.io.File
 import java.util.Scanner
 
-class KaddyBot(private val discordAPI: ImplDiscordAPI) : LogOwner, Kaddy by KaddyImpl(discordAPI) {
+class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : LogOwner, Kaddy by KaddyImpl(discordAPI) {
 
     companion object {
         @JvmStatic
@@ -38,6 +38,7 @@ class KaddyBot(private val discordAPI: ImplDiscordAPI) : LogOwner, Kaddy by Kadd
         logger.info { "Connecting bot..." }
         discordAPI.connectBlocking()
         logger.info { "Bot connected to Discord!" }
+        discordAPI.registerListener(AllListener(this))
         try {
             pluginManager.registerInterface(JavaPluginLoader::class.java)
             val p = pluginManager.loadPlugin(File("./plugins/sample-plugin.jar"))
