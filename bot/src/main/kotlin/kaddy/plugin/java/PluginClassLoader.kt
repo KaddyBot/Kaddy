@@ -91,6 +91,6 @@ internal class PluginClassLoader(private val loader: JavaPluginLoader,
         pluginState = IllegalStateException("Initial initialization")
         this.pluginInit = plugin
 
-        plugin.init(loader, description)
+        plugin.init(this.loader.kaddy, loader, description)
     }
 }

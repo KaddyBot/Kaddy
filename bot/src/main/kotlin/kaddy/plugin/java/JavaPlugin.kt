@@ -1,5 +1,6 @@
 package kaddy.plugin.java
 
+import kaddy.Kaddy
 import kaddy.plugin.Plugin
 import kaddy.plugin.PluginDescriptionFile
 import kaddy.plugin.PluginLoader
@@ -7,6 +8,9 @@ import kaddy.util.Logging
 import mu.KLogger
 
 abstract class JavaPlugin() : Plugin {
+
+    override final lateinit var bot: Kaddy
+        internal set
 
     override final lateinit var description: PluginDescriptionFile
         internal set
@@ -39,7 +43,8 @@ abstract class JavaPlugin() : Plugin {
 
     override fun onDisable() { }
 
-    internal fun init(loader: PluginLoader, descriptionFile: PluginDescriptionFile) {
+    internal fun init(kaddy: Kaddy, loader: PluginLoader, descriptionFile: PluginDescriptionFile) {
+        this.bot = kaddy
         this.pluginLoader = loader
         this.description = descriptionFile
         Logging.init(this::class.java, description.name)

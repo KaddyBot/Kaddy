@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.jar.JarFile
 
-internal class JavaPluginLoader(private val kaddy: Kaddy) : PluginLoader {
+internal class JavaPluginLoader(internal val kaddy: Kaddy) : PluginLoader {
 
     companion object {
         const val FILE_PATTERN = """^.+\.jar$"""
