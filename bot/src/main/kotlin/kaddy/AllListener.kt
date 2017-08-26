@@ -20,6 +20,7 @@ import de.btobastian.javacord.listener.user.*
 import de.btobastian.javacord.listener.voice.*
 import de.btobastian.javacord.listener.voicechannel.*
 import kaddy.event.channel.*
+import kaddy.event.message.*
 import java.awt.Color
 
 internal class AllListener(private val k: Kaddy) :
@@ -56,28 +57,28 @@ internal class AllListener(private val k: Kaddy) :
         ChannelDeleteEvent(channel).call(k)
     }
 
-    override fun onMessageCreate(api: DiscordAPI, p1: Message?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onMessageCreate(api: DiscordAPI, message: Message) {
+        MessageCreateEvent(message).call(k)
     }
 
-    override fun onMessageDelete(api: DiscordAPI, p1: Message?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onMessageDelete(api: DiscordAPI, message: Message) {
+        MessageDeleteEvent(message).call(k)
     }
 
-    override fun onMessageEdit(api: DiscordAPI, p1: Message?, p2: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onMessageEdit(api: DiscordAPI, message: Message, previousContent: String) {
+        MessageEditEvent(message, previousContent).call(k)
     }
 
-    override fun onReactionAdd(api: DiscordAPI, p1: Reaction?, p2: User?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onReactionAdd(api: DiscordAPI, reaction: Reaction, user: User) {
+        ReactionAddEvent(reaction, user).call(k)
     }
 
-    override fun onReactionRemove(api: DiscordAPI, p1: Reaction?, p2: User?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onReactionRemove(api: DiscordAPI, reaction: Reaction, user: User) {
+        ReactionRemoveEvent(reaction, user).call(k)
     }
 
-    override fun onReactionRemoveAll(api: DiscordAPI, p1: Message?, p2: MutableList<Reaction>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onReactionRemoveAll(api: DiscordAPI, message: Message, previousReactions: List<Reaction>) {
+        ReactionRemoveAllEvent(message, previousReactions).call(k)
     }
 
     override fun onTypingStart(api: DiscordAPI, p1: User?, channel: Channel?) {
