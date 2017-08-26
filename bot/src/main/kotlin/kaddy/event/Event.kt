@@ -1,5 +1,6 @@
 package kaddy.event
 
+import kaddy.Kaddy
 import kaddy.plugin.PluginManager
 
 /**
@@ -19,6 +20,13 @@ abstract class Event {
     open val eventName: String by lazy { this::class.java.simpleName }
 
     abstract val handlers: HandlerList
+
+    /**
+     * A convenience method for calling an event.
+     */
+    internal fun call(kaddy: Kaddy) {
+        kaddy.pluginManager.callEvent(this)
+    }
 
     enum class Result {
 
