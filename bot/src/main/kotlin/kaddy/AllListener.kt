@@ -45,7 +45,7 @@ internal class AllListener(private val k: Kaddy) :
         ChannelChangePositionEvent(channel, previousPosition).call(k)
     }
 
-    override fun onChannelChangeTopic(api: DiscordAPI, channel: Channel, previousTopic: String) {
+    override fun onChannelChangeTopic(api: DiscordAPI, channel: Channel, previousTopic: String?) {
         ChannelChangeTopicEvent(channel, previousTopic).call(k)
     }
 

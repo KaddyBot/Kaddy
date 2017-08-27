@@ -6,7 +6,7 @@ import kaddy.event.HandlerList
 /**
  * Indicates a channel's topic has changed.
  */
-open class ChannelChangeTopicEvent(channel: Channel, val previousTopic: String) : ChannelEvent(channel) {
+open class ChannelChangeTopicEvent(channel: Channel, val previousTopic: String?) : ChannelEvent(channel) {
 
     override val handlers: HandlerList = h
 
