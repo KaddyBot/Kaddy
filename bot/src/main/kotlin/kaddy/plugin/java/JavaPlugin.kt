@@ -20,8 +20,8 @@ abstract class JavaPlugin() : Plugin {
 
     internal var enabled = false
         set(value) {
-            if (value) onEnable() else onDisable()
             field = value
+            if (value) onEnable() else onDisable()
         }
     override final val isEnabled
         get() = enabled
