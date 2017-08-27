@@ -81,51 +81,51 @@ internal class AllListener(private val k: Kaddy) :
         ReactionRemoveAllEvent(message, previousReactions).call(k)
     }
 
-    override fun onTypingStart(api: DiscordAPI, p1: User?, channel: Channel?) {
+    override fun onTypingStart(api: DiscordAPI, user: User, channel: Channel) {
+        TypingStartEvent(user, channel).call(k)
+    }
+
+    override fun onRoleChangeColor(api: DiscordAPI, role: Role?, p2: Color?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangeColor(api: DiscordAPI, p1: Role?, p2: Color?) {
+    override fun onRoleChangeHoist(api: DiscordAPI, role: Role?, p2: Boolean) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangeHoist(api: DiscordAPI, p1: Role?, p2: Boolean) {
+    override fun onRoleChangeManaged(api: DiscordAPI, role: Role?, p2: Boolean) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangeManaged(api: DiscordAPI, p1: Role?, p2: Boolean) {
+    override fun onRoleChangeMentionable(api: DiscordAPI, role: Role?, p2: Boolean) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangeMentionable(api: DiscordAPI, p1: Role?, p2: Boolean) {
+    override fun onRoleChangeName(api: DiscordAPI, role: Role?, p2: String?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangeName(api: DiscordAPI, p1: Role?, p2: String?) {
+    override fun onRoleChangePermissions(api: DiscordAPI, role: Role?, p2: Permissions?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangePermissions(api: DiscordAPI, p1: Role?, p2: Permissions?) {
+    override fun onRoleChangePosition(api: DiscordAPI, role: Role?, p2: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangePosition(api: DiscordAPI, p1: Role?, p2: Int) {
+    override fun onRoleCreate(api: DiscordAPI, role: Role?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleCreate(api: DiscordAPI, p1: Role?) {
+    override fun onRoleDelete(api: DiscordAPI, role: Role?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleDelete(api: DiscordAPI, p1: Role?) {
+    override fun onRoleChangeOverwrittenPermissions(api: DiscordAPI, role: Role?, channel: Channel?, p3: Permissions?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onRoleChangeOverwrittenPermissions(api: DiscordAPI, p1: Role?, channel: Channel?, p3: Permissions?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRoleChangeOverwrittenPermissions(api: DiscordAPI, p1: Role?, channel: VoiceChannel?, p3: Permissions?) {
+    override fun onRoleChangeOverwrittenPermissions(api: DiscordAPI, role: Role?, channel: VoiceChannel?, p3: Permissions?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
