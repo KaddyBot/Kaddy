@@ -43,7 +43,6 @@ class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Lo
             pluginManager.registerInterface(JavaPluginLoader::class.java)
             val p = pluginManager.loadPlugin(File("./plugins/sample-plugin.jar"))
             pluginManager.enablePlugin(p ?: throw IllegalArgumentException())
-            pluginManager.disablePlugin(p)
         } catch (e: Throwable) {
             e.printStackTrace()
         }
