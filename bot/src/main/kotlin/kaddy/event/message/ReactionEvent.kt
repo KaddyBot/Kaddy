@@ -11,7 +11,7 @@ abstract class ReactionEvent(
         /**
          * The reaction this event pertains to.
          */
-        val reaction: Reaction,
+        open val reaction: Reaction?,
         /**
          * The user responsible for the reaction.
          */

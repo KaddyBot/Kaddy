@@ -14,9 +14,9 @@ open class TypingStartEvent(
          */
         val user: User,
         /**
-         * The channel being typed in.
+         * The channel being typed in. This will be null if the user is typing in a private message.
          */
-        val channel: Channel) : Event() {
+        val channel: Channel?) : Event() {
 
     override val handlers: HandlerList = h
 

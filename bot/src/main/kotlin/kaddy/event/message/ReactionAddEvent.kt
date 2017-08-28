@@ -7,7 +7,12 @@ import kaddy.event.HandlerList
 /**
  * Indicates a reaction has been added to a message.
  */
-open class ReactionAddEvent(reaction: Reaction, user: User) : ReactionEvent(reaction, user) {
+open class ReactionAddEvent(
+        /**
+         * The updated reaction.
+         */
+        override val reaction: Reaction,
+        user: User) : ReactionEvent(reaction, user) {
 
     override val handlers: HandlerList = h
 

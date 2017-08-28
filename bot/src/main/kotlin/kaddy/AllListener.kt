@@ -99,7 +99,7 @@ internal class AllListener(private val k: Kaddy) :
         ReactionAddEvent(reaction, user).call(k)
     }
 
-    override fun onReactionRemove(api: DiscordAPI, reaction: Reaction, user: User) {
+    override fun onReactionRemove(api: DiscordAPI, reaction: Reaction?, user: User) {
         ReactionRemoveEvent(reaction, user).call(k)
     }
 
@@ -107,7 +107,7 @@ internal class AllListener(private val k: Kaddy) :
         ReactionRemoveAllEvent(message, previousReactions).call(k)
     }
 
-    override fun onTypingStart(api: DiscordAPI, user: User, channel: Channel) {
+    override fun onTypingStart(api: DiscordAPI, user: User, channel: Channel?) {
         TypingStartEvent(user, channel).call(k)
     }
 
