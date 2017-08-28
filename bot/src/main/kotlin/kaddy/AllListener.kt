@@ -22,6 +22,7 @@ import de.btobastian.javacord.listener.voicechannel.*
 import kaddy.event.channel.*
 import kaddy.event.message.*
 import kaddy.event.role.*
+import kaddy.event.server.CustomEmojiDeleteEvent
 import java.awt.Color
 
 internal class AllListener(private val k: Kaddy) :
@@ -132,8 +133,8 @@ internal class AllListener(private val k: Kaddy) :
         RoleChangeOverwrittenPermissionsVoiceEvent(role, channel, previousPermissions).call(k)
     }
 
-    override fun onCustomEmojiDelete(api: DiscordAPI, p1: CustomEmoji?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onCustomEmojiDelete(api: DiscordAPI, deletedEmoji: CustomEmoji) {
+        CustomEmojiDeleteEvent(deletedEmoji).call(k)
     }
 
     override fun onServerChangeIcon(api: DiscordAPI, p1: Server?, p2: String?) {
