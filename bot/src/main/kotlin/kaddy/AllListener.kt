@@ -23,6 +23,16 @@ import kaddy.event.channel.*
 import kaddy.event.message.*
 import kaddy.event.role.*
 import kaddy.event.server.CustomEmojiDeleteEvent
+import kaddy.event.server.ServerChangeIconEvent
+import kaddy.event.server.ServerChangeNameEvent
+import kaddy.event.server.ServerChangeOwnerEvent
+import kaddy.event.server.ServerChangeRegionEvent
+import kaddy.event.server.ServerJoinEvent
+import kaddy.event.server.ServerLeaveEvent
+import kaddy.event.server.ServerMemberAddEvent
+import kaddy.event.server.ServerMemberBanEvent
+import kaddy.event.server.ServerMemberRemoveEvent
+import kaddy.event.server.ServerMemberUnbanEvent
 import java.awt.Color
 
 internal class AllListener(private val k: Kaddy) :
@@ -137,44 +147,44 @@ internal class AllListener(private val k: Kaddy) :
         CustomEmojiDeleteEvent(deletedEmoji).call(k)
     }
 
-    override fun onServerChangeIcon(api: DiscordAPI, p1: Server?, p2: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerChangeIcon(api: DiscordAPI, server: Server, previousIcon: String?) {
+        ServerChangeIconEvent(server, previousIcon).call(k)
     }
 
-    override fun onServerChangeName(api: DiscordAPI, p1: Server?, p2: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerChangeName(api: DiscordAPI, server: Server, previousName: String) {
+        ServerChangeNameEvent(server, previousName).call(k)
     }
 
-    override fun onServerChangeOwner(api: DiscordAPI, p1: Server?, p2: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerChangeOwner(api: DiscordAPI, server: Server, previousOwnerId: String) {
+        ServerChangeOwnerEvent(server, previousOwnerId).call(k)
     }
 
-    override fun onServerChangeRegion(api: DiscordAPI, p1: Server?, p2: Region?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerChangeRegion(api: DiscordAPI, server: Server, previousRegion: Region) {
+        ServerChangeRegionEvent(server, previousRegion).call(k)
     }
 
-    override fun onServerJoin(api: DiscordAPI, p1: Server?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerJoin(api: DiscordAPI, server: Server) {
+        ServerJoinEvent(server).call(k)
     }
 
-    override fun onServerLeave(api: DiscordAPI, p1: Server?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerLeave(api: DiscordAPI, server: Server) {
+        ServerLeaveEvent(server).call(k)
     }
 
-    override fun onServerMemberAdd(api: DiscordAPI, p1: User?, p2: Server?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerMemberAdd(api: DiscordAPI, user: User, server: Server) {
+        ServerMemberAddEvent(server, user).call(k)
     }
 
-    override fun onServerMemberBan(api: DiscordAPI, p1: User?, p2: Server?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerMemberBan(api: DiscordAPI, user: User, server: Server) {
+        ServerMemberBanEvent(server, user).call(k)
     }
 
-    override fun onServerMemberRemove(api: DiscordAPI, p1: User?, p2: Server?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerMemberRemove(api: DiscordAPI, user: User, server: Server) {
+        ServerMemberRemoveEvent(server, user).call(k)
     }
 
-    override fun onServerMemberUnban(api: DiscordAPI, p1: String?, p2: Server?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onServerMemberUnban(api: DiscordAPI, userId: String, server: Server) {
+        ServerMemberUnbanEvent(server, userId).call(k)
     }
 
     override fun onUserChangeGame(api: DiscordAPI, p1: User?, p2: String?) {
