@@ -41,6 +41,12 @@ import kaddy.event.user.UserChangeOverwrittenVoicePermissionsEvent
 import kaddy.event.user.UserChangeStatusEvent
 import kaddy.event.user.UserRoleAddEvent
 import kaddy.event.user.UserRoleRemoveEvent
+import kaddy.event.voicechannel.UserJoinVoiceChannelEvent
+import kaddy.event.voicechannel.UserLeaveVoiceChannelEvent
+import kaddy.event.voicechannel.VoiceChannelChangeNameEvent
+import kaddy.event.voicechannel.VoiceChannelChangePositionEvent
+import kaddy.event.voicechannel.VoiceChannelCreateEvent
+import kaddy.event.voicechannel.VoiceChannelDeleteEvent
 import java.awt.Color
 
 internal class AllListener(private val k: Kaddy) :
@@ -230,26 +236,26 @@ internal class AllListener(private val k: Kaddy) :
     }
 
     override fun onUserJoinVoiceChannel(api: DiscordAPI, user: User?, channel: VoiceChannel) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        UserJoinVoiceChannelEvent(channel, user).call(k)
     }
 
-    override fun onUserLeaveVoiceChannel(api: DiscordAPI, user: User) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onUserLeaveVoiceChannel(api: DiscordAPI, user: User?) {
+        UserLeaveVoiceChannelEvent(user).call(k)
     }
 
-    override fun onVoiceChannelChangeName(api: DiscordAPI, channel: VoiceChannel, p2: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onVoiceChannelChangeName(api: DiscordAPI, channel: VoiceChannel, previousName: String) {
+        VoiceChannelChangeNameEvent(channel, previousName).call(k)
     }
 
-    override fun onVoiceChannelChangePosition(api: DiscordAPI, channel: VoiceChannel, p2: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onVoiceChannelChangePosition(api: DiscordAPI, channel: VoiceChannel, previousPosition: Int) {
+        VoiceChannelChangePositionEvent(channel, previousPosition).call(k)
     }
 
     override fun onVoiceChannelCreate(api: DiscordAPI, channel: VoiceChannel) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        VoiceChannelCreateEvent(channel).call(k)
     }
 
     override fun onVoiceChannelDelete(api: DiscordAPI, channel: VoiceChannel) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        VoiceChannelDeleteEvent(channel).call(k)
     }
 }
