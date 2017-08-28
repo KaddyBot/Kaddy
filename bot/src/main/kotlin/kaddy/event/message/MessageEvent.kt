@@ -10,4 +10,4 @@ abstract class MessageEvent(
         /**
          * The message this event pertains to.
          */
-        val message: Message) : Event()
+        open val message: Message) : Event()

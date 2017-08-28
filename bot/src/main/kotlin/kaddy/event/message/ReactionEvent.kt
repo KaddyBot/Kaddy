@@ -15,4 +15,4 @@ abstract class ReactionEvent(
         /**
          * The user responsible for the reaction.
          */
-        val user: User) : Event()
+        open val user: User) : Event()
