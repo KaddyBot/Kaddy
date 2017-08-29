@@ -49,9 +49,13 @@ allprojects {
 
 subprojects {
     repositories {
+        mavenLocal()
         jcenter()
         maven {
             url 'http://repo.bastian-oppermann.de'
+        }
+        maven {
+            url 'http://repo.onarandombox.com/content/groups/public/'
         }
     }
 
@@ -62,5 +66,7 @@ subprojects {
         compile 'de.btobastian.javacord:javacord:2.0.15:shaded'
         compile 'com.google.auto.service:auto-service:1.0-rc3'
         compile 'io.github.config4k:config4k:0.3.0'
+        compile 'com.github.plugkit:plugkit:1.0-SNAPSHOT'
+        compile 'com.dumptruckman.dtmlibs:logback-logging:1.0-SNAPSHOT'
     }
 }

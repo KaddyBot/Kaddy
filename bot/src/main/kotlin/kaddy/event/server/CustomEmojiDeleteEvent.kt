@@ -1,10 +1,8 @@
 package kaddy.event.server
 
 import de.btobastian.javacord.entities.CustomEmoji
-import de.btobastian.javacord.entities.permissions.Role
-import kaddy.event.Event
 import kaddy.event.HandlerList
-import kaddy.event.role.RoleEvent
+import kaddy.event.Event
 
 /**
  * Indicates a custom emoji was deleted.

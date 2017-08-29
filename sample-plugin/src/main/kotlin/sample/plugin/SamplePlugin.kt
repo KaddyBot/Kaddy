@@ -1,14 +1,15 @@
 package sample.plugin
 
-import kaddy.event.EventHandler
-import kaddy.event.Listener
+import com.github.plugkit.event.EventHandler
+import com.github.plugkit.event.Listener
+import kaddy.Kaddy
 import kaddy.event.channel.ChannelChangeNameEvent
-import kaddy.plugin.java.JavaPlugin
+import kaddy.plugin.JavaPlugin
 
 class SamplePlugin : JavaPlugin(), Listener {
 
     override fun onEnable() {
-        bot.pluginManager.registerEvents(this, this)
+        host.pluginManager.registerEvents(this, this)
         logger.info { "Hi!" }
     }
 

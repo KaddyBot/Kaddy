@@ -1,8 +1,8 @@
 package kaddy.event.voicechannel
 
 import de.btobastian.javacord.entities.User
-import kaddy.event.Event
 import kaddy.event.HandlerList
+import kaddy.event.Event
 
 /**
  * Indicates a user left a voice channel.

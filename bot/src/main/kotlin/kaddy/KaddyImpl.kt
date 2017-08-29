@@ -1,5 +1,6 @@
 package kaddy
 
+import com.github.plugkit.plugin.SimplePluginManager
 import com.google.common.util.concurrent.FutureCallback
 import de.btobastian.javacord.ImplDiscordAPI
 import de.btobastian.javacord.entities.*
@@ -7,23 +8,18 @@ import de.btobastian.javacord.entities.message.Message
 import de.btobastian.javacord.entities.permissions.Permissions
 import de.btobastian.javacord.entities.permissions.PermissionsBuilder
 import de.btobastian.javacord.entities.permissions.impl.ImplPermissionsBuilder
-import de.btobastian.javacord.listener.Listener
 import de.btobastian.javacord.utils.ThreadPool
 import de.btobastian.javacord.utils.ratelimits.RateLimitManager
-import kaddy.plugin.SimplePluginManager
+import dtmlibs.logging.Loggable
 import kaddy.util.KaddyLoggable
-import kaddy.util.LogOwner
-import kaddy.util.Loggable
-import kaddy.util.Logging
-import mu.KLogger
 import java.awt.image.BufferedImage
 import java.util.concurrent.Future
 
 internal class KaddyImpl(internal val api: ImplDiscordAPI) : Kaddy, Loggable by KaddyLoggable {
 
-    override val logger: KLogger
-        get() = Logging.getLogger(this)
-    override val pluginManager = SimplePluginManager(this)
+    override val logOwner = Kaddy::class.java
+
+    override val pluginManager = SimplePluginManager<Kaddy>(this, Kaddy::class.java)
     override var game: String?
         get() = api.game
         set(value) { api.game = value }
@@ -75,7 +71,4 @@ internal class KaddyImpl(internal val api: ImplDiscordAPI) : Kaddy, Loggable by 
 
     override fun createPermissionsBuilder(permissions: Permissions?): PermissionsBuilder
             = if (permissions == null) ImplPermissionsBuilder() else ImplPermissionsBuilder(permissions)
-
-    override val logOwner: Class<out LogOwner>
-        get() = KaddyLoggable.logOwner
 }

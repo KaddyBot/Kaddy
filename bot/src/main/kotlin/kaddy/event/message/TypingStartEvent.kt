@@ -2,8 +2,8 @@ package kaddy.event.message
 
 import de.btobastian.javacord.entities.Channel
 import de.btobastian.javacord.entities.User
-import kaddy.event.Event
 import kaddy.event.HandlerList
+import kaddy.event.Event
 
 /**
  * Indicates a message is being typed by a user.

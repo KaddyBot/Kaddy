@@ -1,29 +1,23 @@
 package kaddy
 
+import com.github.plugkit.PluginHost
+import com.github.plugkit.plugin.PluginManager
 import com.google.common.util.concurrent.FutureCallback
 import de.btobastian.javacord.entities.*
 import de.btobastian.javacord.entities.message.Message
 import de.btobastian.javacord.entities.permissions.Permissions
 import de.btobastian.javacord.entities.permissions.PermissionsBuilder
-import de.btobastian.javacord.listener.Listener
 import de.btobastian.javacord.utils.ThreadPool
 import de.btobastian.javacord.utils.ratelimits.RateLimitManager
-import kaddy.plugin.PluginManager
-import kaddy.util.LogOwner
-import mu.KLogger
 import java.awt.image.BufferedImage
 import java.util.concurrent.Future
 
-interface Kaddy : LogOwner {
+interface Kaddy : PluginHost {
 
-    /**
-     * The logger for the bot.
-     */
-    val logger: KLogger
     /**
      * The plugin manager for the bot.
      */
-    val pluginManager: PluginManager
+    val pluginManager: PluginManager<Kaddy>
     /**
      * The name of the game shown under the bot's name in the user list.
      */

@@ -3,13 +3,13 @@ package kaddy
 import ch.qos.logback.classic.Level
 import de.btobastian.javacord.ImplDiscordAPI
 import de.btobastian.javacord.Javacord
-import kaddy.plugin.java.JavaPluginLoader
-import kaddy.util.LogOwner
-import kaddy.util.Logging
+import dtmlibs.logging.Logging
+import dtmlibs.logging.logback.setRootLogLevel
+import kaddy.plugin.JarPluginLoader
 import java.io.File
 import java.util.Scanner
 
-class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : LogOwner, Kaddy by KaddyImpl(discordAPI) {
+class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Kaddy by KaddyImpl(discordAPI) {
 
     companion object {
         @JvmStatic
@@ -40,7 +40,7 @@ class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Lo
         logger.info { "Bot connected to Discord!" }
         discordAPI.registerListener(AllListener(this))
         try {
-            pluginManager.registerInterface(JavaPluginLoader::class.java)
+            pluginManager.registerInterface(JarPluginLoader::class.java)
             val p = pluginManager.loadPlugin(File("./plugins/sample-plugin.jar"))
             pluginManager.enablePlugin(p ?: throw IllegalArgumentException())
         } catch (e: Throwable) {
