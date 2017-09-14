@@ -24,7 +24,7 @@ import kaddy.Kaddy
 
 internal object KaddyLoggable : Loggable {
     init {
-        Logging.registerLogOwner(Kaddy::class.java, "Kaddy")
+        Logging.registerLogOwnerName(Kaddy::class.java, "Kaddy")
     }
     override val logOwner = Kaddy::class.java
 }
