@@ -91,3 +91,11 @@ subprojects {
         compile 'com.dumptruckman.dtmlibs:logback-logging:1.0-SNAPSHOT'
     }
 }
+
+project(':sample-plugin') {
+    task copySample(type: Copy) {
+        dependsOn build
+        from jar
+        into "${project.rootDir}/plugins"
+    }
+}
