@@ -18,6 +18,8 @@
  */
 package kaddy
 
+import com.googlecode.lanterna.input.KeyStroke
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory
 import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
@@ -35,12 +37,17 @@ object KaddyHub {
         val mainMethod = botClass.getDeclaredMethod("main", Array<String>::class.java)
         stopMethod = botClass.getDeclaredMethod("stop")
 
-        val botThread = Thread({ mainMethod.invoke(null, args) })
+        kaddyThread = Thread({ mainMethod.invoke(null, args) }, "Kaddy")
 
-        botThread.contextClassLoader = classLoader
-        botThread.isDaemon
+        kaddyThread!!.contextClassLoader = classLoader
 
-        botThread.start()
+        kaddyThread!!.start()
+    }
+
+    fun stopBotThread() {
+        stopMethod?.invoke(null)
+        kaddyThread = null
+        stopMethod = null
     }
 
     private fun createBotClassLoader():  ClassLoader {
@@ -59,8 +66,52 @@ object KaddyHub {
 
         return urls.toTypedArray();
     }
+
+    val botRunning: Boolean
+        get() = kaddyThread != null
 }
 
 fun main(args: Array<String>) {
-    KaddyHub.startBotThread(args)
+    val terminal = DefaultTerminalFactory().createTerminal()
+    terminal.setCursorVisible(false)
+
+    val graphics = terminal.newTextGraphics()
+
+    var keyStroke: KeyStroke? = null
+
+    while (keyStroke == null || keyStroke.character != '2') {
+        terminal.clearScreen()
+        graphics.putString(0, 0, "Welcome to Kaddy!")
+        graphics.putString(0, 3, "Please select an option:")
+        if (KaddyHub.botRunning) {
+            graphics.putString(2, 5, "1. Stop bot")
+        } else {
+            graphics.putString(2, 5, "1. Start bot")
+        }
+        graphics.putString(2, 6, "2. Exit")
+
+        terminal.flush()
+
+        keyStroke = terminal.readInput()
+
+        try {
+            if (keyStroke?.character == '1') {
+                if (KaddyHub.botRunning) {
+                    KaddyHub.stopBotThread()
+                } else {
+                    KaddyHub.startBotThread(args)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    if (KaddyHub.botRunning) {
+        KaddyHub.stopBotThread()
+    }
+
+    terminal.close()
+
+    //KaddyHub.startBotThread(args)
 }

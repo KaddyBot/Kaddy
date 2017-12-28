@@ -20,26 +20,24 @@ package kaddy
 
 import ch.qos.logback.classic.Level
 import com.xenomachina.argparser.ArgParser
-import com.xenomachina.argparser.SystemExitException
 import com.xenomachina.argparser.default
 import de.btobastian.javacord.ImplDiscordAPI
 import de.btobastian.javacord.Javacord
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
-import dtmlibs.logging.logger
 import kaddy.plugin.JarPluginLoader
 import java.io.File
 import java.util.Scanner
 
-private class BotArgs(parser: ArgParser) {
-    val devMode by parser.flagging("-d", "--dev-mode",
-            help = "enable developer mode for IDEs");
-
-    val token by parser.positional("TOKEN", "the bot's api token")
-            .default(null)
-}
-
 class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Kaddy by KaddyImpl(discordAPI) {
+
+    private class BotArgs(parser: ArgParser) {
+        val devMode by parser.flagging("-d", "--dev-mode",
+                help = "enable developer mode for IDEs");
+
+        val token by parser.positional("TOKEN", "the bot's api token")
+                .default(null)
+    }
 
     companion object {
         private lateinit var bot: KaddyBot
