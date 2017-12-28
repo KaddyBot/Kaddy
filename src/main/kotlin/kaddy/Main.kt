@@ -113,5 +113,5 @@ fun main(args: Array<String>) {
 
     terminal.close()
 
-    //KaddyHub.startBotThread(args)
+    System.exit(0);
 }
