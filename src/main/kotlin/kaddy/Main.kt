@@ -20,6 +20,7 @@ package kaddy
 
 import com.googlecode.lanterna.input.KeyStroke
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory
+import kaddy.security.SelectiveSecurityManager
 import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
@@ -72,6 +73,10 @@ object KaddyHub {
 }
 
 fun main(args: Array<String>) {
+    val securityManager = SelectiveSecurityManager(true)
+    securityManager.enabledForCurrentThread = false
+    System.setSecurityManager(securityManager)
+
     val terminal = DefaultTerminalFactory().createTerminal()
     terminal.setCursorVisible(false)
 
