@@ -19,27 +19,48 @@
 package kaddy
 
 import java.io.File
+import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
 
-fun main(args: Array<String>) {
+object KaddyHub {
+    private var kaddyThread: Thread? = null
+    private var stopMethod: Method? = null
 
-    val urls = mutableListOf<URL>()
+    @JvmStatic
+    fun startBotThread(args: Array<String>) {
 
-    val file = File("./bot/build/classes/main")
-    urls.add(file.toURI().toURL());
+        val classLoader = createBotClassLoader()
+        val botClass = classLoader.loadClass("kaddy.KaddyBot")
+        val mainMethod = botClass.getDeclaredMethod("main", Array<String>::class.java)
+        stopMethod = botClass.getDeclaredMethod("stop")
 
-    for (f in File("./libs").listFiles()) {
-        urls.add(f.toURI().toURL());
+        val botThread = Thread({ mainMethod.invoke(null, args) })
+
+        botThread.contextClassLoader = classLoader
+        botThread.isDaemon
+
+        botThread.start()
     }
 
-    val classLoader = URLClassLoader(urls.toTypedArray(), ClassLoader.getSystemClassLoader().parent)
+    private fun createBotClassLoader():  ClassLoader {
+        return URLClassLoader(gatherClasses(), ClassLoader.getSystemClassLoader().parent)
+    }
 
-    val botClass = classLoader.loadClass("kaddy.KaddyBot")
-    val mainMethod = botClass.getDeclaredMethod("main", Array<String>::class.java)
+    private fun gatherClasses(): Array<URL> {
+        val urls = mutableListOf<URL>()
 
-    Thread.currentThread().contextClassLoader = classLoader
+        val file = File("./bot/build/classes/main")
+        urls.add(file.toURI().toURL());
 
-    mainMethod.invoke(null, args)
+        for (f in File("./libs").listFiles()) {
+            urls.add(f.toURI().toURL());
+        }
 
+        return urls.toTypedArray();
+    }
+}
+
+fun main(args: Array<String>) {
+    KaddyHub.startBotThread(args)
 }
