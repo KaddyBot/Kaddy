@@ -21,13 +21,18 @@ package kaddy
 import com.github.plugkit.PluginHost
 import com.github.plugkit.plugin.PluginManager
 import com.google.common.util.concurrent.FutureCallback
-import de.btobastian.javacord.entities.*
-import de.btobastian.javacord.entities.message.Message
-import de.btobastian.javacord.entities.permissions.Permissions
-import de.btobastian.javacord.entities.permissions.PermissionsBuilder
-import de.btobastian.javacord.utils.ThreadPool
-import de.btobastian.javacord.utils.ratelimits.RateLimitManager
+import net.dv8tion.jda.core.AccountType
+import net.dv8tion.jda.core.entities.Category
+import net.dv8tion.jda.core.entities.Channel
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Invite
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.VoiceChannel
+import net.dv8tion.jda.core.requests.restaction.GuildAction
+import net.dv8tion.jda.core.utils.cache.SnowflakeCacheView
 import java.awt.image.BufferedImage
+import java.security.Permissions
 import java.util.concurrent.Future
 
 interface Kaddy : PluginHost {
@@ -36,6 +41,21 @@ interface Kaddy : PluginHost {
      * The plugin manager for the bot.
      */
     val pluginManager: PluginManager<Kaddy>
+
+    fun createGuild(): GuildAction
+
+    val accountType: AccountType
+
+    val categories: List<Category>
+
+    fun getCategoriesByName(name: CharSequence, ignoreCase: Boolean = false)
+
+    fun getCategoryById(id: Long)
+
+    fun getCategoryById(id: CharSequence)
+
+    val categoryCache: SnowflakeCacheView<Category>
+
     /**
      * The name of the game shown under the bot's name in the user list.
      */
@@ -73,7 +93,7 @@ interface Kaddy : PluginHost {
     /**
      * All servers known to the bot.
      */
-    val servers: MappedCollection<CharSequence, Server>
+    val servers: MappedCollection<CharSequence, Guild>
     /**
      * All cached users known to the bot.
      *

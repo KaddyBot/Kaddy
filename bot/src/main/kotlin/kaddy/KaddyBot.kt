@@ -26,6 +26,9 @@ import de.btobastian.javacord.Javacord
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
 import kaddy.plugin.JarPluginLoader
+import net.dv8tion.jda.core.AccountType
+import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.JDABuilder
 import java.io.File
 import java.util.Scanner
 
@@ -50,6 +53,9 @@ class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Ka
                 println("Missing token.");
                 return;
             }
+
+            val jda = JDABuilder(AccountType.BOT).setToken(botArgs.token).buildBlocking()
+            jda.categories
 
             bot = KaddyBot(Javacord.getApi(botArgs.token, true) as ImplDiscordAPI)
 
