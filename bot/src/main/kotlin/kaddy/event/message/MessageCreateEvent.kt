@@ -24,7 +24,7 @@ import kaddy.event.HandlerList
 /**
  * Indicates a message has been created.
  */
-open class MessageCreateEvent(message: Message) : MessageEvent(message) {
+open class MessageCreateEvent(message: Message) : MessageEvent(message, ) {
 
     override val handlers: HandlerList = h
 

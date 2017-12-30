@@ -18,13 +18,14 @@
  */
 package kaddy.event.message
 
-import de.btobastian.javacord.entities.message.Message
 import kaddy.event.HandlerList
+import net.dv8tion.jda.core.entities.MessageChannel
 
 /**
  * Indicates a message has been deleted.
  */
-open class MessageDeleteEvent(message: Message) : MessageEvent(message) {
+open class MessageDeleteEvent(messageId: Long, channel: MessageChannel) :
+        MessageEvent(messageId, channel) {
 
     override val handlers: HandlerList = h
 

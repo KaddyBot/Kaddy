@@ -16,15 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Kaddy.  If not, see <http://www.gnu.org/licenses/>.
  */
-package kaddy.event.message
+package kaddy.event.user
 
-import de.btobastian.javacord.entities.message.Message
 import kaddy.event.HandlerList
+import net.dv8tion.jda.core.entities.MessageChannel
+import net.dv8tion.jda.core.entities.User
+import java.time.OffsetDateTime
 
 /**
- * Indicates a message has been edited.
+ * Indicates a user's status was changed.
  */
-open class MessageEditEvent(message: Message, val previousContent: String) : MessageEvent(message, ) {
+open class UserTypingEvent(user: User, val channel: MessageChannel,
+                           val timestamp: OffsetDateTime) : UserEvent(user) {
 
     override val handlers: HandlerList = h
 

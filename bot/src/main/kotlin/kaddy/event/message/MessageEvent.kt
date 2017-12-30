@@ -18,14 +18,18 @@
  */
 package kaddy.event.message
 
-import de.btobastian.javacord.entities.message.Message
 import kaddy.event.Event
+import net.dv8tion.jda.core.entities.MessageChannel
 
 /**
  * For events related to messages.
  */
 abstract class MessageEvent(
         /**
-         * The message this event pertains to.
+         * The message id this event pertains to.
          */
-        open val message: Message) : Event()
+        open val messageId: Long,
+        /**
+         * The channel this message originated in.
+         */
+        val channel: MessageChannel) : Event()

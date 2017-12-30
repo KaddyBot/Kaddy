@@ -18,7 +18,7 @@
  */
 package kaddy.event.voicechannel
 
-import de.btobastian.javacord.entities.VoiceChannel
 import kaddy.event.Event
+import net.dv8tion.jda.core.entities.VoiceChannel
 
 abstract class VoiceChannelEvent(open val voiceChannel: VoiceChannel) : Event()

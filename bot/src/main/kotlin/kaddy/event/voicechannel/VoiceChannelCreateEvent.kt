@@ -18,8 +18,8 @@
  */
 package kaddy.event.voicechannel
 
-import de.btobastian.javacord.entities.VoiceChannel
 import kaddy.event.HandlerList
+import net.dv8tion.jda.core.entities.VoiceChannel
 
 /**
  * Indicates a voice channel was created.

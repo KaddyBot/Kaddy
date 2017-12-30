@@ -18,7 +18,7 @@
  */
 package kaddy.event.role
 
-import de.btobastian.javacord.entities.permissions.Role
 import kaddy.event.Event
+import net.dv8tion.jda.core.entities.Role
 
 abstract class RoleEvent(open val role: Role) : Event()

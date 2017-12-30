@@ -18,7 +18,7 @@
  */
 package kaddy.event.user
 
-import de.btobastian.javacord.entities.User
 import kaddy.event.Event
+import net.dv8tion.jda.core.entities.User
 
 abstract class UserEvent(open val user: User) : Event()

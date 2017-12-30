@@ -22,17 +22,9 @@ import com.github.plugkit.PluginHost
 import com.github.plugkit.plugin.PluginManager
 import com.google.common.util.concurrent.FutureCallback
 import net.dv8tion.jda.core.AccountType
-import net.dv8tion.jda.core.entities.Category
-import net.dv8tion.jda.core.entities.Channel
-import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.core.entities.Invite
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.User
-import net.dv8tion.jda.core.entities.VoiceChannel
+import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.requests.restaction.GuildAction
-import net.dv8tion.jda.core.utils.cache.SnowflakeCacheView
-import java.awt.image.BufferedImage
-import java.security.Permissions
 import java.util.concurrent.Future
 
 interface Kaddy : PluginHost {
@@ -42,87 +34,49 @@ interface Kaddy : PluginHost {
      */
     val pluginManager: PluginManager<Kaddy>
 
-    fun createGuild(): GuildAction
+    fun createGuild(name: CharSequence): GuildAction
 
     val accountType: AccountType
 
-    val categories: List<Category>
+    val categories: IDMappedCollection<Category>
 
-    fun getCategoriesByName(name: CharSequence, ignoreCase: Boolean = false)
+    fun getCategories(name: CharSequence, ignoreCase: Boolean = true): Collection<Category>
 
-    fun getCategoryById(id: Long)
+    val emotes: IDMappedCollection<Emote>
 
-    fun getCategoryById(id: CharSequence)
-
-    val categoryCache: SnowflakeCacheView<Category>
+    fun getEmotes(name: CharSequence, ignoreCase: Boolean = true): Collection<Emote>
 
     /**
-     * The name of the game shown under the bot's name in the user list.
+     * All guilds (servers) known to the bot.
      */
-    var game: String?
+    val guilds: IDMappedCollection<Guild>
+
+    fun getGuilds(name: CharSequence, ignoreCase: Boolean = true): Collection<Guild>
+
+    fun getMutualGuilds(users: Collection<User>): Collection<Guild>
+
+    fun getMutualGuilds(vararg users: User): Collection<Guild>
+
+    val ping: Long
+
+    val presence: Presence
+
+    val privateChannels: IDMappedCollection<PrivateChannel>
+
+    val responseTotal: Long
+
+    val roles: IDMappedCollection<Role>
+
+    fun getRoles(name: CharSequence, ignoreCase: Boolean = true): Collection<Role>
+
+    val selfUser: SelfUser
+
     /**
-     * Sets the streaming url for the bot which if not null will show the bot as streaming.
+     * All text channels known to the bot.
      */
-    var streamingUrl: String?
-    /**
-     * Whether the bot is idle or not.
-     */
-    var isIdle: Boolean
-    /**
-     * Whether the bot should automatically reconnect or not.
-     */
-    var isAutoReconnecting: Boolean
-    /**
-     * Whether the bot should wait for all servers to be loaded or not.
-     *
-     * This value is `true` by default.
-     * If it's set to `false` the list of servers ([.getServers]) will be empty after connecting and
-     * will be filled a few seconds later (depending on the amount of servers).
-     */
-    var isWaitingForServersOnStartup: Boolean
-    /**
-     * The size of the message cache.
-     *
-     * If the cache is full the oldest message in the cache will be removed.
-     */
-    var messageCacheSize: Int
-    /**
-     * The Discord user object that represents this bot.
-     */
-    val botUser: User
-    /**
-     * All servers known to the bot.
-     */
-    val servers: MappedCollection<CharSequence, Guild>
-    /**
-     * All cached users known to the bot.
-     *
-     * Some members of bigger servers may not be in the cache because discord only sends the online users for servers
-     * with more than 250 members.
-     */
-    val users: MappedCollection<CharSequence, User>
-    /**
-     * All channels known to the bot.
-     */
-    val channels: MappedCollection<CharSequence, Channel>
-    /**
-     * All voice channels known to the bot.
-     */
-    val voiceChannels: MappedCollection<CharSequence, VoiceChannel>
-    /**
-     * Gets the rate limit manager which caches all rate limits of this bot.
-     */
-    val rateLimitManager: RateLimitManager
-    /**
-     * The used thread pool of this bot.
-     *
-     * The [ThreadPool] contains the used thread pool(s) of this bot.
-     * Don't use multi-threading if you don't know how to make things thread-safe
-     * or how to prevent stuff like deadlocks!
-     *
-     * @return The used thread pool.
-     */
-    val threadPool: ThreadPool
+    val textChannels: IDMappedCollection<TextChannel>
+
+    fun getTextChannels(name: CharSequence, ignoreCase: Boolean = true): Collection<TextChannel>
 
     /**
      * Gets a user by its id. It first will check if the user is in the cache. If no user was found in the cache it
@@ -131,62 +85,61 @@ interface Kaddy : PluginHost {
      * @param userId The id of the user.
      * @return The user with the given id or null if no user with that id was found.
      */
-    fun getUser(userId: CharSequence): Future<User>
 
     /**
-     * Gets a message by its id.
+     * All cached users known to the bot.
      *
-     * This function may return null even if the message exists!
-     *
-     * @param id The id of the message.
-     * @return The message with the given id or null no message was found.
+     * Some members of bigger servers may not be in the cache because discord only sends the online users for servers
+     * with more than 250 members.
      */
-    fun getMessage(messageId: CharSequence): Message?
+    val users: IDMappedCollection<User>
+
+    fun getUsers(name: CharSequence, ignoreCase: Boolean = true): Collection<User>
+
+    fun retrieveUser(id: Long): RestAction<User>
+
+    fun retrieveUser(id: CharSequence): RestAction<User>
 
     /**
-     * Accepts an invite.
-     *
-     * @param inviteCode The invite code.
-     * @param callback The callback which will be informed when you joined the server or joining failed.
-     * @return The server.
+     * All voice channels known to the bot.
      */
-    fun acceptInvite(inviteCode: CharSequence, callback: FutureCallback<Server>? = null): Future<Server>
+    val voiceChannels: IDMappedCollection<VoiceChannel>
 
-    /**
-     * Creates a new server.
-     *
-     * @param name The name of the new server.
-     * @param region The region of the server.
-     * @param icon The icon of the server.
-     * @param callback The callback which will be informed when you created the server.
-     * @return The created server.
-     */
-    fun createServer(name: CharSequence, region: Region = Region.US_CENTRAL,
-                     icon: BufferedImage? = null, callback: FutureCallback<Server>? = null): Future<Server>
+    fun getVoiceChannels(name: CharSequence, ignoreCase: Boolean = true): Collection<VoiceChannel>
 
-    /**
-     * Tries to parse the given invite.
-     *
-     * @param invite The invite code or the invite url.
-     * @param callback The callback which will be informed when the invite has been parsed.
-     * @return The parsed invite.
-     */
-    fun parseInvite(invite: CharSequence, callback: FutureCallback<Invite>? = null): Future<Invite>
-
-    /**
-     * Deletes the invite with the given code.
-     *
-     * @param inviteCode The invite code.
-     * @return A future which tells us whether the deletion was successful or not.
-     */
-    fun deleteInvite(inviteCode: CharSequence): Future<Void>
-
-    /**
-     * Gets a new permissions builder which is either a copy of the given permissions if not null, or a new one with all
-     * permissions set to [de.btobastian.javacord.entities.permissions.PermissionState.NONE]
-     *
-     * @param permissions The permissions which should be copied.
-     * @return A new permissions builder.
-     */
-    fun createPermissionsBuilder(permissions: Permissions? = null): PermissionsBuilder
+//    /**
+//     * Gets a message by its id.
+//     *
+//     * This function may return null even if the message exists!
+//     *
+//     * @param id The id of the message.
+//     * @return The message with the given id or null no message was found.
+//     */
+//    fun getMessage(messageId: CharSequence): Message?
+//
+//    /**
+//     * Accepts an invite.
+//     *
+//     * @param inviteCode The invite code.
+//     * @param callback The callback which will be informed when you joined the server or joining failed.
+//     * @return The server.
+//     */
+//    fun acceptInvite(inviteCode: CharSequence, callback: FutureCallback<Guild>? = null): Future<Guild>
+//
+//    /**
+//     * Tries to parse the given invite.
+//     *
+//     * @param invite The invite code or the invite url.
+//     * @param callback The callback which will be informed when the invite has been parsed.
+//     * @return The parsed invite.
+//     */
+//    fun parseInvite(invite: CharSequence, callback: FutureCallback<Invite>? = null): Future<Invite>
+//
+//    /**
+//     * Deletes the invite with the given code.
+//     *
+//     * @param inviteCode The invite code.
+//     * @return A future which tells us whether the deletion was successful or not.
+//     */
+//    fun deleteInvite(inviteCode: CharSequence): Future<Void>
 }
