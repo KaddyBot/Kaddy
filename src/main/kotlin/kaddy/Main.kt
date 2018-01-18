@@ -20,63 +20,36 @@ package kaddy
 
 import com.googlecode.lanterna.input.KeyStroke
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory
-import kaddy.security.SelectiveSecurityManager
 import java.io.File
-import java.lang.reflect.Method
-import java.net.URL
-import java.net.URLClassLoader
+import java.io.PrintWriter
 
 object KaddyHub {
-    private var kaddyThread: Thread? = null
-    private var stopMethod: Method? = null
+    private var botProcess: Process? = null
+    private var input: PrintWriter? = null
 
     @JvmStatic
-    fun startBotThread(args: Array<String>) {
-
-        val classLoader = createBotClassLoader()
-        val botClass = classLoader.loadClass("kaddy.KaddyBot")
-        val mainMethod = botClass.getDeclaredMethod("main", Array<String>::class.java)
-        stopMethod = botClass.getDeclaredMethod("stop")
-
-        kaddyThread = Thread({ mainMethod.invoke(null, args) }, "Kaddy")
-
-        kaddyThread!!.contextClassLoader = classLoader
-
-        kaddyThread!!.start()
+    fun startBot(args: Array<String>) {
+        val newArgs = mutableListOf("java", "-cp", "./bot/build/libs/bot.jar;./libs/*", "kaddy.KaddyBot", "-d")
+        newArgs.addAll(args)
+        val processBuilder = ProcessBuilder()
+        processBuilder.command(newArgs).inheritIO()
+        println(File(".").absolutePath)
+        println(processBuilder.command())
+        botProcess = processBuilder.start()
+        input = PrintWriter(botProcess!!.outputStream)
     }
 
-    fun stopBotThread() {
-        stopMethod?.invoke(null)
-        kaddyThread = null
-        stopMethod = null
-    }
-
-    private fun createBotClassLoader():  ClassLoader {
-        return URLClassLoader(gatherClasses(), ClassLoader.getSystemClassLoader().parent)
-    }
-
-    private fun gatherClasses(): Array<URL> {
-        val urls = mutableListOf<URL>()
-
-        val file = File("./bot/build/classes/main")
-        urls.add(file.toURI().toURL());
-
-        for (f in File("./libs").listFiles()) {
-            urls.add(f.toURI().toURL());
-        }
-
-        return urls.toTypedArray();
+    fun stopBot() {
+        input?.println("stop")
+        botProcess?.waitFor()
+        botProcess = null
     }
 
     val botRunning: Boolean
-        get() = kaddyThread != null
+        get() = botProcess != null
 }
 
 fun main(args: Array<String>) {
-    val securityManager = SelectiveSecurityManager(true)
-    securityManager.enabledForCurrentThread = false
-    System.setSecurityManager(securityManager)
-
     val terminal = DefaultTerminalFactory().createTerminal()
     terminal.setCursorVisible(false)
 
@@ -102,9 +75,9 @@ fun main(args: Array<String>) {
         try {
             if (keyStroke?.character == '1') {
                 if (KaddyHub.botRunning) {
-                    KaddyHub.stopBotThread()
+                    KaddyHub.stopBot()
                 } else {
-                    KaddyHub.startBotThread(args)
+                    KaddyHub.startBot(args)
                 }
             }
         } catch (e: Exception) {
@@ -113,7 +86,7 @@ fun main(args: Array<String>) {
     }
 
     if (KaddyHub.botRunning) {
-        KaddyHub.stopBotThread()
+        KaddyHub.stopBot()
     }
 
     terminal.close()
