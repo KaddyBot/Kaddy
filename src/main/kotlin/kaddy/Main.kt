@@ -32,15 +32,16 @@ object KaddyHub {
         val newArgs = mutableListOf("java", "-cp", "./bot/build/libs/bot.jar;./libs/*", "kaddy.KaddyBot", "-d")
         newArgs.addAll(args)
         val processBuilder = ProcessBuilder()
-        processBuilder.command(newArgs).inheritIO()
-        println(File(".").absolutePath)
-        println(processBuilder.command())
+        processBuilder.command(newArgs)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT)
         botProcess = processBuilder.start()
         input = PrintWriter(botProcess!!.outputStream)
     }
 
     fun stopBot() {
         input?.println("stop")
+        input?.flush()
         botProcess?.waitFor()
         botProcess = null
     }
