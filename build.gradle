@@ -105,11 +105,3 @@ subprojects {
         classpath = sourceSets.main.runtimeClasspath
     }
 }
-
-project(':sample-plugin') {
-    task copySample(type: Copy) {
-        dependsOn build
-        from jar
-        into "${project.rootDir}/plugins"
-    }
-}
