@@ -18,6 +18,7 @@
  */
 package kaddy
 
+import dtmlibs.logging.LogOwner
 import dtmlibs.logging.Loggable
 import kaddy.util.KaddyLoggable
 import net.dv8tion.jda.core.JDA
@@ -35,6 +36,9 @@ import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.requests.restaction.GuildAction
 
 internal class KaddyImpl(internal val api: JDA) : Kaddy, Loggable by KaddyLoggable {
+
+    override val logOwner: Class<out LogOwner>
+        get() = KaddyLoggable.logOwner
 
     override val ping: Long
         get() = api.ping
