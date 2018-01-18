@@ -18,71 +18,110 @@
  */
 package kaddy
 
-import com.google.common.util.concurrent.FutureCallback
-import de.btobastian.javacord.ImplDiscordAPI
-import de.btobastian.javacord.entities.*
-import de.btobastian.javacord.entities.message.Message
-import de.btobastian.javacord.entities.permissions.Permissions
-import de.btobastian.javacord.entities.permissions.PermissionsBuilder
-import de.btobastian.javacord.entities.permissions.impl.ImplPermissionsBuilder
-import de.btobastian.javacord.utils.ThreadPool
-import de.btobastian.javacord.utils.ratelimits.RateLimitManager
 import dtmlibs.logging.Loggable
 import kaddy.util.KaddyLoggable
-import java.awt.image.BufferedImage
-import java.util.concurrent.Future
+import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.AccountType
+import net.dv8tion.jda.core.entities.Category
+import net.dv8tion.jda.core.entities.Emote
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.PrivateChannel
+import net.dv8tion.jda.core.entities.Role
+import net.dv8tion.jda.core.entities.SelfUser
+import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.VoiceChannel
+import net.dv8tion.jda.core.requests.RestAction
+import net.dv8tion.jda.core.requests.restaction.GuildAction
 
-internal class KaddyImpl(internal val api: ImplDiscordAPI) : Kaddy, Loggable by KaddyLoggable {
+internal class KaddyImpl(internal val api: JDA) : Kaddy, Loggable by KaddyLoggable {
 
-    override var game: String?
-        get() = api.game
-        set(value) { api.game = value }
-    override var streamingUrl: String?
-        get() = api.streamingUrl
-        set(value) { api.setGame(game, value) }
-    override var isIdle: Boolean
-        get() = api.isIdle
-        set(value) { api.isIdle = value }
-    override var isAutoReconnecting: Boolean
-        get() = api.isAutoReconnectEnabled
-        set(value) { api.setAutoReconnect(value) }
-    override var isWaitingForServersOnStartup: Boolean
-        get() = api.isWaitingForServersOnStartup
-        set(value) { api.setWaitForServersOnStartup(value) }
-    override var messageCacheSize: Int
-        get() = api.messageCacheSize
-        set(value) { api.messageCacheSize = value }
-    override val botUser: User
-        get() = api.yourself
-    override val servers = DefaultMappedCollection<CharSequence, Server>({ api.servers },
-            { api.getServerById(it.toString()) })
-    override val users = DefaultMappedCollection<CharSequence, User>({ api.users },
-            { api.getCachedUserById(it.toString()) })
-    override val channels = DefaultMappedCollection<CharSequence, Channel>({ api.channels },
-            { api.getChannelById(it.toString()) })
-    override val voiceChannels = DefaultMappedCollection<CharSequence, VoiceChannel>({ api.voiceChannels },
-            { api.getVoiceChannelById(it.toString()) })
-    override val rateLimitManager: RateLimitManager
-        get() = api.rateLimitManager
-    override val threadPool: ThreadPool
-        get() = api.threadPool
+    override val ping: Long
+        get() = api.ping
+    override val presence: Presence = Presence(api.presence)
+    override val responseTotal: Long
+        get() = api.responseTotal
+    override val selfUser: SelfUser
+        get() = api.selfUser
 
-    override fun getUser(userId: CharSequence): Future<User> = api.getUserById(userId.toString())
+    override fun createGuild(name: CharSequence): GuildAction
+            = api.createGuild(name.toString())
 
-    override fun getMessage(messageId: CharSequence): Message? = api.getMessageById(messageId.toString())
+    override val guilds = DefaultMappedCollection<Guild>({ api.guilds },
+            { api.getGuildById(it) })
 
-    override fun acceptInvite(inviteCode: CharSequence, callback: FutureCallback<Server>?): Future<Server>
-            = api.acceptInvite(inviteCode.toString(), callback)
+    override fun getGuilds(name: CharSequence, ignoreCase: Boolean):
+            Collection<Guild>
+            = api.getGuildsByName(name.toString(), ignoreCase)
 
-    override fun createServer(name: CharSequence, region: Region,
-                              icon: BufferedImage?, callback: FutureCallback<Server>?): Future<Server>
-            = api.createServer(name.toString(), region, icon, callback)
+    override fun getMutualGuilds(users: Collection<User>): Collection<Guild>
+            = api.getMutualGuilds(users)
 
-    override fun parseInvite(invite: CharSequence, callback: FutureCallback<Invite>?): Future<Invite>
-            = api.parseInvite(invite.toString(), callback)
+    override fun getMutualGuilds(vararg users: User): Collection<Guild> {
+        return api.getMutualGuilds(*users)
+    }
 
-    override fun deleteInvite(inviteCode: CharSequence): Future<Void> = api.deleteInvite(inviteCode.toString())
+    override val users = DefaultMappedCollection<User>({ api.users },
+            { api.getUserById(it) })
 
-    override fun createPermissionsBuilder(permissions: Permissions?): PermissionsBuilder
-            = if (permissions == null) ImplPermissionsBuilder() else ImplPermissionsBuilder(permissions)
+    override fun getUsers(name: CharSequence, ignoreCase: Boolean):
+            Collection<User> = api.getUsersByName(name.toString(), ignoreCase)
+
+    override fun retrieveUser(id: Long): RestAction<User>
+            = api.retrieveUserById(id)
+
+    override fun retrieveUser(id: CharSequence): RestAction<User>
+            = api.retrieveUserById(id.toString())
+
+    override val textChannels = DefaultMappedCollection<TextChannel>(
+            { api.textChannels },
+            { api.getTextChannelById(it) })
+
+    override fun getTextChannels(name: CharSequence, ignoreCase: Boolean):
+            Collection<TextChannel> = api.getTextChannelsByName(name.toString(),
+            ignoreCase)
+
+    override val voiceChannels = DefaultMappedCollection<VoiceChannel>(
+            { api.voiceChannels },
+            { api.getVoiceChannelById(it) })
+
+    override fun getVoiceChannels(name: CharSequence, ignoreCase: Boolean):
+            Collection<VoiceChannel>
+            = api.getVoiceChannelByName(name.toString(), ignoreCase)
+
+    override val privateChannels = DefaultMappedCollection<PrivateChannel>(
+            { api.privateChannels },
+            { api.getPrivateChannelById(it) })
+
+    override val categories = DefaultMappedCollection<Category>(
+            { api.categories },
+            { api.getCategoryById(it) })
+
+    override fun getCategories(name: CharSequence, ignoreCase: Boolean):
+            Collection<Category>
+            = api.getCategoriesByName(name.toString(), ignoreCase)
+
+    override val emotes = DefaultMappedCollection<Emote>({ api.emotes },
+            { api.getEmoteById(it) })
+
+    override fun getEmotes(name: CharSequence, ignoreCase: Boolean):
+            Collection<Emote> = api.getEmotesByName(name.toString(), ignoreCase)
+
+    override val roles = DefaultMappedCollection<Role>({ api.roles },
+            { api.getRoleById(it) })
+
+    override fun getRoles(name: CharSequence, ignoreCase: Boolean):
+            Collection<Role> = api.getRolesByName(name.toString(), ignoreCase)
+
+    override val accountType: AccountType
+        get() = api.accountType
+
+//    override fun getMessage(messageId: CharSequence): Message? = api.getMessageById(messageId.toString())
+//
+//    override fun acceptInvite(inviteCode: CharSequence, callback: FutureCallback<Guild>?): Future<Guild>
+//            = api.acceptInvite(inviteCode.toString(), callback)
+//    override fun parseInvite(invite: CharSequence, callback: FutureCallback<Invite>?): Future<Invite>
+//            = api.parseInvite(invite.toString(), callback)
+//
+//    override fun deleteInvite(inviteCode: CharSequence): Future<Void> = api.deleteInvite(inviteCode.toString())
 }

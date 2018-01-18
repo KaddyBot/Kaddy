@@ -21,14 +21,14 @@ package kaddy
 import ch.qos.logback.classic.Level
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
-import de.btobastian.javacord.ImplDiscordAPI
-import de.btobastian.javacord.Javacord
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
-import dtmlibs.logging.logger
+import net.dv8tion.jda.core.AccountType
+import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.JDABuilder
 import java.util.Scanner
 
-class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Kaddy by KaddyImpl(discordAPI) {
+class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by KaddyImpl(discordAPI) {
 
     private class BotArgs(parser: ArgParser) {
         val devMode by parser.flagging("-d", "--dev-mode",
@@ -50,7 +50,7 @@ class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Ka
                 return;
             }
 
-            bot = KaddyBot(Javacord.getApi(botArgs.token, true) as ImplDiscordAPI)
+            bot = KaddyBot(JDABuilder(AccountType.BOT).setToken(botArgs.token).buildBlocking())
 
             bot.connect()
 
@@ -78,12 +78,12 @@ class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Ka
     }
 
     private fun connect() {
-        logger.info { "Connecting bot..." }
-        discordAPI.connectBlocking()
-        logger.info { "Bot connected to Discord!" }
+//        logger.info { "Connecting bot..." }
+//        discordAPI.connectBlocking()
+//        logger.info { "Bot connected to Discord!" }
     }
 
     private fun disconnect() {
-        discordAPI.disconnect()
+        discordAPI.shutdown()
     }
 }
