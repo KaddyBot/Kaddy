@@ -18,7 +18,6 @@
  */
 package kaddy
 
-import com.github.plugkit.plugin.SimplePluginManager
 import com.google.common.util.concurrent.FutureCallback
 import de.btobastian.javacord.ImplDiscordAPI
 import de.btobastian.javacord.entities.*
@@ -35,9 +34,6 @@ import java.util.concurrent.Future
 
 internal class KaddyImpl(internal val api: ImplDiscordAPI) : Kaddy, Loggable by KaddyLoggable {
 
-    override val logOwner = Kaddy::class.java
-
-    override val pluginManager = SimplePluginManager<Kaddy>(this, Kaddy::class.java)
     override var game: String?
         get() = api.game
         set(value) { api.game = value }

@@ -25,8 +25,7 @@ import de.btobastian.javacord.ImplDiscordAPI
 import de.btobastian.javacord.Javacord
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
-import kaddy.plugin.JarPluginLoader
-import java.io.File
+import dtmlibs.logging.logger
 import java.util.Scanner
 
 class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Kaddy by KaddyImpl(discordAPI) {
@@ -82,14 +81,6 @@ class KaddyBot private constructor (private val discordAPI: ImplDiscordAPI) : Ka
         logger.info { "Connecting bot..." }
         discordAPI.connectBlocking()
         logger.info { "Bot connected to Discord!" }
-        discordAPI.registerListener(AllListener(this))
-        try {
-            pluginManager.registerInterface(JarPluginLoader::class.java)
-            val p = pluginManager.loadPlugin(File("./plugins/sample-plugin.jar"))
-            pluginManager.enablePlugin(p ?: throw IllegalArgumentException())
-        } catch (e: Throwable) {
-            e.printStackTrace()
-        }
     }
 
     private fun disconnect() {
