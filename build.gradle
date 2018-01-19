@@ -55,15 +55,6 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
 
-task copyDependencies(type: Copy) {
-    from configurations.compile
-    into "${project.rootDir}/libs"
-}
-
-task cleanDependencies(type: Delete) {
-    delete "${project.rootDir}/libs"
-}
-
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
@@ -83,14 +74,50 @@ license {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier 'sources'
     from sourceSets.main.allSource
-    from "{project.rootDir}/LICENSE.txt"
+    from "${project.rootDir}/LICENSE.txt"
 }
 
 artifacts {
     archives sourcesJar
 }
 
-task run(type: JavaExec, dependsOn: classes) {
+task runBot(type: JavaExec, dependsOn: classes) {
     main = 'kaddy.KaddyBot'
     classpath = sourceSets.main.runtimeClasspath
 }
+
+task deleteDependencies(type: Delete) {
+    delete "${project.rootDir}/libs"
+}
+
+task configureDependencies(type: Copy, dependsOn: deleteDependencies) {
+    from configurations.compile
+    into "${project.rootDir}/libs"
+}
+
+task deleteRuntime(type: Delete) {
+    delete "${project.rootDir}/runtime"
+}
+
+task configureRuntime(type: Copy, dependsOn: deleteRuntime) {
+    from("${project.buildDir}/libs") {
+        exclude '*-sources.jar'
+    }
+    into "${project.rootDir}/runtime"
+}
+
+task start(type: JavaExec, dependsOn: [configureDependencies, configureRuntime]) {
+    doFirst {
+        if (!new File("${project.rootDir}/runtime").exists()) {
+            throw new GradleException("runtime missing")
+        }
+        if (!new File("${project.rootDir}/libs").exists()) {
+            throw new GradleException("libs missing")
+        }
+    }
+
+    main = 'kaddy.KaddyBot'
+    classpath = files("${project.rootDir}/runtime/*", "${project.rootDir}/libs/*")
+}
+
+task cleanAll(type: Delete, dependsOn: [clean, deleteDependencies, deleteRuntime])
