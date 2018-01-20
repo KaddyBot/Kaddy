@@ -23,6 +23,7 @@ import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
+import kaddy.listeners.GeneralListener
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
@@ -77,7 +78,11 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
         Logging.setRootLogLevel(Level.TRACE)
     }
 
+    val dumptruckman = discordAPI.getUserById(118330468025237505).openPrivateChannel().complete()
+
     private fun connect() {
+        discordAPI.addEventListener(GeneralListener(this))
+        dumptruckman.sendMessage("Hi!")
 //        logger.info { "Connecting bot..." }
 //        discordAPI.connectBlocking()
 //        logger.info { "Bot connected to Discord!" }
@@ -85,5 +90,30 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
 
     private fun disconnect() {
         discordAPI.shutdown()
+    }
+
+    internal fun attemptUpdate() {
+        dumptruckman.sendMessage("Attempting update...")
+        Thread({
+            val updateProcess = ProcessBuilder().command("git", "pull").start()
+            if (updateProcess.waitFor() == 0) {
+                logger.info("Successfully pulled.")
+            } else {
+                dumptruckman.sendMessage("Couldn't pull.")
+                logger.error("Could not pull.")
+                return@Thread
+            }
+            val buildProcess = ProcessBuilder().command("gradlew", "clean", "build").start()
+            if (buildProcess.waitFor() == 0) {
+                logger.info("Successfully built.")
+            } else {
+                logger.error("Could not build.")
+                dumptruckman.sendMessage("Couldn't build.")
+                return@Thread
+            }
+            logger.info("Restarting...")
+            val startProcess = ProcessBuilder().command("gradlew", "start").start()
+            disconnect()
+        }).start()
     }
 }
