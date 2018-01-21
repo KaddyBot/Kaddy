@@ -96,25 +96,25 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
     internal fun attemptUpdate(channel: MessageChannel) {
         logger.info("Attempting update...")
         Thread({
+            channel.sendMessage("Pulling changes...").queue()
             val updateProcess = ProcessBuilder().command("git", "pull").start()
             if (updateProcess.waitFor() == 0) {
-                channel.sendMessage("Successfully pulled.").queue()
                 logger.info("Successfully pulled.")
             } else {
                 channel.sendMessage("Couldn't pull.").queue()
                 logger.error("Could not pull.")
                 return@Thread
             }
+            channel.sendMessage("Building...").queue()
             val buildProcess = ProcessBuilder().command("gradlew.bat", "clean", "build").start()
             if (buildProcess.waitFor() == 0) {
-                channel.sendMessage("Successfully built.").queue()
                 logger.info("Successfully built.")
             } else {
                 channel.sendMessage("Could not build.").queue()
                 logger.error("Could not build.")
                 return@Thread
             }
-            channel.sendMessage("Restarting").queue()
+            channel.sendMessage("Restarting...").complete()
             logger.info("Restarting...")
             disconnect()
         }).start()
