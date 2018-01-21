@@ -23,10 +23,12 @@ import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
+import dtmlibs.logging.logger
 import kaddy.listeners.GeneralListener
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
+import net.dv8tion.jda.core.entities.MessageChannel
 import java.util.Scanner
 
 class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by KaddyImpl(discordAPI) {
@@ -78,41 +80,42 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
         Logging.setRootLogLevel(Level.TRACE)
     }
 
-    val dumptruckman = discordAPI.getUserById(118330468025237505).openPrivateChannel().complete()
+    val home by lazy {
+        textChannels[352502441838903296]
+    }
 
     private fun connect() {
         discordAPI.addEventListener(GeneralListener(this))
-        dumptruckman.sendMessage("Hi!")
-//        logger.info { "Connecting bot..." }
-//        discordAPI.connectBlocking()
-//        logger.info { "Bot connected to Discord!" }
+        home?.sendMessage("Hello!")?.queue()
     }
 
-    private fun disconnect() {
+    internal fun disconnect() {
         discordAPI.shutdown()
     }
 
-    internal fun attemptUpdate() {
-        dumptruckman.sendMessage("Attempting update...")
+    internal fun attemptUpdate(channel: MessageChannel) {
+        logger.info("Attempting update...")
         Thread({
             val updateProcess = ProcessBuilder().command("git", "pull").start()
             if (updateProcess.waitFor() == 0) {
+                channel.sendMessage("Successfully pulled.").queue()
                 logger.info("Successfully pulled.")
             } else {
-                dumptruckman.sendMessage("Couldn't pull.")
+                channel.sendMessage("Couldn't pull.").queue()
                 logger.error("Could not pull.")
                 return@Thread
             }
-            val buildProcess = ProcessBuilder().command("gradlew", "clean", "build").start()
+            val buildProcess = ProcessBuilder().command("gradlew.bat", "clean", "build").start()
             if (buildProcess.waitFor() == 0) {
+                channel.sendMessage("Successfully built.").queue()
                 logger.info("Successfully built.")
             } else {
+                channel.sendMessage("Could not build.").queue()
                 logger.error("Could not build.")
-                dumptruckman.sendMessage("Couldn't build.")
                 return@Thread
             }
+            channel.sendMessage("Restarting").queue()
             logger.info("Restarting...")
-            val startProcess = ProcessBuilder().command("gradlew", "start").start()
             disconnect()
         }).start()
     }

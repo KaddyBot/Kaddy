@@ -1,1 +1,3 @@
 rootProject.name = 'kaddy'
+include 'kaddy-bot'
+include 'kaddy-daemon'

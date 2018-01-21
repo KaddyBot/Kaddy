@@ -23,9 +23,16 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 
 internal class GeneralListener(private val bot: KaddyBot) : ListenerAdapter() {
-    override fun onMessageReceived(event: MessageReceivedEvent?) {
-        if (event!!.message.contentRaw == ">update") {
-            bot.attemptUpdate()
+    override fun onMessageReceived(event: MessageReceivedEvent) {
+        if (event.message.contentRaw == ">update" && event.author.idLong == 118330468025237505) {
+            event.channel.sendMessage("Attempting to update...").queue()
+            bot.attemptUpdate(event.channel)
+        } else if (event.message.contentRaw == ">stop" && event.author.idLong == 118330468025237505) {
+            event.channel.sendMessage("Shutting down...").queue()
+            bot.disconnect()
+        } else if (event.message.contentRaw == ">ping") {
+            println("pong")
+            event.channel.sendMessage("pong").queue()
         }
     }
 }
