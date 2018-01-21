@@ -23,12 +23,14 @@ import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
-import dtmlibs.logging.logger
 import kaddy.listeners.GeneralListener
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.MessageChannel
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.Scanner
 
 class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by KaddyImpl(discordAPI) {
@@ -43,6 +45,8 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
 
     companion object {
         private lateinit var bot: KaddyBot
+
+        internal val botStopPath: Path = Paths.get("./.bot-stop");
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -87,9 +91,20 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
     private fun connect() {
         discordAPI.addEventListener(GeneralListener(this))
         home?.sendMessage("Hello!")?.queue()
+        if (Files.exists(botStopPath)) {
+            home?.sendMessage("The shutdown file was present when I started. This means I probably wasn't " +
+                    "suppose to be started.")?.queue()
+            try {
+                Files.delete(botStopPath)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                home?.sendMessage("I couldn't delete the shutdown file!")
+            }
+        }
     }
 
     internal fun disconnect() {
+        home?.sendMessage("Shutting down...")?.complete()
         discordAPI.shutdown()
     }
 
@@ -114,7 +129,7 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
                 logger.error("Could not build.")
                 return@Thread
             }
-            channel.sendMessage("Restarting...").complete()
+            //channel.sendMessage("Restarting...").complete()
             logger.info("Restarting...")
             disconnect()
         }).start()

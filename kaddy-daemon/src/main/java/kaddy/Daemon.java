@@ -19,13 +19,17 @@
 package kaddy;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Daemon {
 
-    public static boolean windows = System.getProperty("os.name").startsWith("Windows");
+    private static final boolean windows = System.getProperty("os.name").startsWith("Windows");
+    private static final Path botStopPath = Paths.get("./.bot-stop");
 
     public static void main(String[] args) {
         List<String> procArgs = new ArrayList<>();
@@ -60,6 +64,14 @@ public class Daemon {
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;
+            }
+            if (Files.exists(botStopPath)) {
+                try {
+                    Files.delete(botStopPath);
+                    break;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
