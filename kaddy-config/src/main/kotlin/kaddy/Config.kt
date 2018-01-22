@@ -59,4 +59,7 @@ class Config(@Transient private val configDir: Path = Paths.get(System.getProper
 
     @Comment("Discord bot API token.")
     var botToken: String = ""
+
+    @Comment("The command prefix that will be used if a more specific one has not been set for the context.")
+    var defaultCommandPrefix: String = ">"
 }

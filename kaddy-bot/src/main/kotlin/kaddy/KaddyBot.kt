@@ -21,8 +21,10 @@ package kaddy
 import ch.qos.logback.classic.Level
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
+import dtmlibs.config.datasource.DataHandlingException
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
+import dtmlibs.logging.logger
 import kaddy.listeners.GeneralListener
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
@@ -33,7 +35,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Scanner
 
-class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by KaddyImpl(discordAPI) {
+class KaddyBot private constructor (private val discordAPI: JDA, val config: Config) : Kaddy by KaddyImpl(discordAPI) {
 
     private class BotArgs(parser: ArgParser) {
         val devMode by parser.flagging("-d", "--dev-mode",
@@ -58,7 +60,15 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
                 return;
             }
 
-            bot = KaddyBot(JDABuilder(AccountType.BOT).setToken(botArgs.token).buildBlocking())
+            val config = Config()
+            try {
+                config.load()
+            } catch (e: DataHandlingException) {
+                logger.error { "Could not load config file." }
+                e.printStackTrace()
+            }
+
+            bot = KaddyBot(JDABuilder(AccountType.BOT).setToken(botArgs.token).buildBlocking(), config)
 
             bot.connect()
 
@@ -81,12 +91,12 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
         }
     }
 
-    init {
-        Logging.setRootLogLevel(Level.TRACE)
-    }
-
     val home by lazy {
         textChannels[352502441838903296]
+    }
+
+    init {
+        Logging.setRootLogLevel(Level.TRACE)
     }
 
     private fun connect() {

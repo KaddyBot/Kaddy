@@ -26,10 +26,10 @@ import java.nio.file.Files
 
 internal class GeneralListener(private val bot: KaddyBot) : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent) {
-        if (event.message.contentRaw == ">update" && event.author.idLong == 118330468025237505) {
+        if (event.message.contentRaw == "${bot.config.defaultCommandPrefix}update" && event.author.idLong == 118330468025237505) {
             event.channel.sendMessage("Attempting to update...").queue()
             bot.attemptUpdate(event.channel)
-        } else if (event.message.contentRaw == ">stop" && event.author.idLong == 118330468025237505) {
+        } else if (event.message.contentRaw == "${bot.config.defaultCommandPrefix}stop" && event.author.idLong == 118330468025237505) {
             try {
                 Files.createFile(KaddyBot.botStopPath)
             } catch (e: IOException) {
@@ -38,7 +38,7 @@ internal class GeneralListener(private val bot: KaddyBot) : ListenerAdapter() {
                 bot.home?.sendMessage("Shutdown file already exists!")?.complete()
             }
             bot.disconnect()
-        } else if (event.message.contentRaw == ">ping") {
+        } else if (event.message.contentRaw == "${bot.config.defaultCommandPrefix}ping") {
             println("pong")
             event.channel.sendMessage("pong").queue()
         }

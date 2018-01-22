@@ -105,6 +105,9 @@ public class Main {
         askForConfigValue(in, "Discord bot API token (" + config.getBotToken() + "): ",
                 config::setBotToken);
 
+        askForConfigValue(in, "Default command prefix (" + config.getDefaultCommandPrefix() + "): ",
+                config::setDefaultCommandPrefix);
+
         try {
             config.save();
         } catch (DataHandlingException e) {
