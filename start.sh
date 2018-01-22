@@ -1,2 +1,2 @@
 #!/bin/bash
-exec "java" "-cp" "./runtime/*:./libs/*" "kaddy.KaddyBot" "-d" $1
+exec "java" "-jar" "./kaddy-daemon/build/libs/kaddy-daemon.jar" $@
