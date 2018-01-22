@@ -47,6 +47,7 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
         private lateinit var bot: KaddyBot
 
         internal val botStopPath: Path = Paths.get("./.bot-stop");
+        internal val windows = System.getProperty("os.name").startsWith("Windows")
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -121,7 +122,7 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
                 return@Thread
             }
             channel.sendMessage("Building...").queue()
-            val buildProcess = ProcessBuilder().command("gradlew.bat", "clean", "build").start()
+            val buildProcess = ProcessBuilder().command(if (windows) "gradlew.bat" else "./gradlew", "clean", "build").start()
             if (buildProcess.waitFor() == 0) {
                 logger.info("Successfully built.")
             } else {
