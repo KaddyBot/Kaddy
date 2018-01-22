@@ -91,7 +91,7 @@ class KaddyBot private constructor (private val discordAPI: JDA) : Kaddy by Kadd
 
     private fun connect() {
         discordAPI.addEventListener(GeneralListener(this))
-        home?.sendMessage("Hello from an actual update!")?.queue()
+        home?.sendMessage("Hello!")?.queue()
         if (Files.exists(botStopPath)) {
             home?.sendMessage("The shutdown file was present when I started. This means I probably wasn't " +
                     "suppose to be started.")?.queue()
