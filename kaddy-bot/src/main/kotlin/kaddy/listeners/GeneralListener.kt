@@ -18,6 +18,7 @@
  */
 package kaddy.listeners
 
+import dtmlibs.config.datasource.DataHandlingException
 import kaddy.KaddyBot
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
@@ -41,6 +42,14 @@ internal class GeneralListener(private val bot: KaddyBot) : ListenerAdapter() {
         } else if (event.message.contentRaw == "${bot.config.defaultCommandPrefix}ping") {
             println("pong")
             event.channel.sendMessage("pong").queue()
+        } else if (event.message.contentRaw == "${bot.config.defaultCommandPrefix}reload") {
+            try {
+                bot.config.load()
+            } catch (e: DataHandlingException) {
+                e.printStackTrace()
+                event.channel.sendMessage("There was an error reloading the config: ${e.message}")
+            }
+            event.channel.sendMessage("Reloaded configuration.").queue()
         }
     }
 }
