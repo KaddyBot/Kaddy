@@ -18,6 +18,7 @@
  */
 package kaddy
 
+import co.aikar.commands.JDACommandConfig
 import dtmlibs.config.annotation.Comment
 import dtmlibs.config.datasource.DataHandlingException
 import dtmlibs.config.datasource.DataSource
@@ -62,4 +63,25 @@ class Config(@Transient private val configDir: Path = Paths.get(System.getProper
 
     @Comment("The command prefix that will be used if a more specific one has not been set for the context.")
     var defaultCommandPrefix: String = ">"
+
+    @Transient
+    val jdaCommandConfig: JDACommandConfig = BaseCommandConfig(this)
+
+    val guilds: MutableMap<Long, GuildConfig> = mutableMapOf()
+
+    class GuildConfig {
+        @Comment("The command prefix for commands in this guild")
+        var commandPrefix: String = ">"
+
+        @Transient
+        val jdaCommandConfig: JDACommandConfig = GuildCommandConfig(this)
+
+        private class GuildCommandConfig(private val guildConfig: Config.GuildConfig) : JDACommandConfig() {
+            override fun getStartsWith(): String = guildConfig.commandPrefix
+        }
+    }
+
+    private class BaseCommandConfig(private val config: Config) : JDACommandConfig() {
+        override fun getStartsWith(): String = config.defaultCommandPrefix
+    }
 }

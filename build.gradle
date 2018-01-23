@@ -30,6 +30,10 @@ subprojects {
         maven {
             url 'http://repo.onarandombox.com/content/groups/public/'
         }
+        mavenLocal()
+        maven {
+            url 'https://repo.aikar.co/nexus/content/repositories/aikar/'
+        }
     }
 
     dependencies {
@@ -78,6 +82,7 @@ subprojects {
 project (':kaddy-config') {
     dependencies {
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        compile("co.aikar:acf-jda:0.5.0-SNAPSHOT")
     }
 }
 

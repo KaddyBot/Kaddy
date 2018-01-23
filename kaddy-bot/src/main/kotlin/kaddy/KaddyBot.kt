@@ -19,12 +19,14 @@
 package kaddy
 
 import ch.qos.logback.classic.Level
+import co.aikar.commands.JDACommandManager
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import dtmlibs.config.datasource.DataHandlingException
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
 import dtmlibs.logging.logger
+import kaddy.commands.UpdateCommand
 import kaddy.listeners.GeneralListener
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
@@ -95,6 +97,9 @@ class KaddyBot private constructor (private val discordAPI: JDA, val config: Con
         textChannels[352502441838903296]
     }
 
+    val commandManager: JDACommandManager = JDACommandManager(discordAPI, config.jdaCommandConfig,
+            KaddyCommandConfigProvider(config), null)
+
     init {
         Logging.setRootLogLevel(Level.TRACE)
     }
@@ -112,6 +117,10 @@ class KaddyBot private constructor (private val discordAPI: JDA, val config: Con
                 home?.sendMessage("I couldn't delete the shutdown file!")
             }
         }
+    }
+
+    private fun registerCommands() {
+
     }
 
     internal fun disconnect() {
