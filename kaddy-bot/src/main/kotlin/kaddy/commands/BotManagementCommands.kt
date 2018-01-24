@@ -21,17 +21,54 @@ package kaddy.commands
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Subcommand
+import dtmlibs.config.datasource.DataHandlingException
+import dtmlibs.logging.logger
 import kaddy.KaddyBot
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import java.io.IOException
+import java.nio.file.Files
 
 @CommandAlias("bot")
 @Conditions("owneronly")
 class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
 
     @Subcommand("update")
+    @CommandAlias("update")
     @Conditions("owneronly")
     fun update(event: MessageReceivedEvent) {
         bot.attemptUpdate(event.channel)
-        //bot.queueIfOwner(event.author, { bot.attemptUpdate(event.channel) })
+    }
+
+    @Subcommand("shutdown|stop")
+    @Conditions("owneronly")
+    fun shutdown(event: MessageReceivedEvent) {
+        event.channel.sendMessage("Shutting down...").queue()
+        try {
+            Files.createFile(KaddyBot.botStopPath)
+        } catch (e: IOException) {
+            event.channel.sendMessage("Couldn't create shutdown file!").queue()
+        } catch (e: java.nio.file.FileAlreadyExistsException) {
+            bot.home?.sendMessage("Shutdown file already exists!")?.queue()
+        }
+        bot.disconnect()
+    }
+
+    @Subcommand("reload|reloadconfig")
+    @Conditions("owneronly")
+    fun reload(event: MessageReceivedEvent) {
+        try {
+            bot.config.load()
+        } catch (e: DataHandlingException) {
+            e.printStackTrace()
+            event.channel.sendMessage("There was an error reloading the config: ${e.message}")
+        }
+        event.channel.sendMessage("Reloaded configuration.").queue()
+    }
+
+    @Subcommand("ping")
+    @CommandAlias("ping")
+    fun ping(event: MessageReceivedEvent) {
+        logger.info("Received ping command")
+        event.channel.sendMessage("pong").queue()
     }
 }

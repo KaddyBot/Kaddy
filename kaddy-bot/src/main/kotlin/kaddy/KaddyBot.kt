@@ -28,7 +28,6 @@ import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
 import dtmlibs.logging.logger
 import kaddy.commands.BotManagementCommands
-import kaddy.listeners.GeneralListener
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
@@ -103,27 +102,11 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
         JDACommandManager(discordAPI, config.jdaCommandConfig, KaddyCommandConfigProvider(config), null)
     }
 
-    val botOwner: Long by lazy {
-        if (discordAPI.accountType == AccountType.BOT) {
-            discordAPI.asBot().applicationInfo.complete().owner.idLong
-        } else {
-            discordAPI.selfUser.idLong
-        }
-    }
-
     init {
-        commandManager.commandConditions.addCondition("owneronly", { context ->
-            if (context.issuer.event.author.idLong != botOwner) {
-                throw ConditionFailedException("Must be bot owner")
-            }
-        })
-
         Logging.setRootLogLevel(Level.TRACE)
     }
 
     private fun connect() {
-        discordAPI.addEventListener(GeneralListener(this))
-        home?.sendMessage("Hello!")?.queue()
         if (Files.exists(botStopPath)) {
             home?.sendMessage("The shutdown file was present when I started. This means I probably wasn't " +
                     "suppose to be started.")?.queue()
@@ -134,7 +117,10 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
                 home?.sendMessage("I couldn't delete the shutdown file!")
             }
         }
+
         registerCommands()
+
+        home?.sendMessage("Hello!")?.queue()
     }
 
     private fun registerCommands() {
@@ -142,7 +128,7 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
     }
 
     internal fun disconnect() {
-        home?.sendMessage("Shutting down...")?.complete()
+        home?.sendMessage("Good bye!")?.complete()
         discordAPI.shutdown()
     }
 
