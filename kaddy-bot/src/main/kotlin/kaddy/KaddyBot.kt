@@ -99,18 +99,21 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
         textChannels[352502441838903296]
     }
 
-    val commandManager: JDACommandManager = JDACommandManager(discordAPI, config.jdaCommandConfig,
-            KaddyCommandConfigProvider(config), null)
+    val commandManager: JDACommandManager by lazy {
+        JDACommandManager(discordAPI, config.jdaCommandConfig, KaddyCommandConfigProvider(config), null)
+    }
 
-    val botOwner: User = if (discordAPI.accountType == AccountType.BOT) {
-        discordAPI.asBot().applicationInfo.complete().owner
-    } else {
-        discordAPI.selfUser
+    val botOwner: Long by lazy {
+        if (discordAPI.accountType == AccountType.BOT) {
+            discordAPI.asBot().applicationInfo.complete().owner.idLong
+        } else {
+            discordAPI.selfUser.idLong
+        }
     }
 
     init {
         commandManager.commandConditions.addCondition("owneronly", { context ->
-            if (context.issuer.event.author !== botOwner) {
+            if (context.issuer.event.author.idLong != botOwner) {
                 throw ConditionFailedException("Must be bot owner")
             }
         })
