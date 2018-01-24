@@ -16,19 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Kaddy.  If not, see <http://www.gnu.org/licenses/>.
  */
-package kaddy
+package kaddy.commands
 
-import co.aikar.commands.CommandConfigProvider
-import co.aikar.commands.JDACommandConfig
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import co.aikar.commands.BaseCommand
+import kaddy.KaddyBot
 
-internal class KaddyCommandConfigProvider(private val config: Config) : CommandConfigProvider {
-    override fun provide(event: MessageReceivedEvent): JDACommandConfig {
-        val guildConfig = config.guilds[event.guild.idLong]
-        return if (guildConfig != null) {
-            guildConfig.jdaCommandConfig
-        } else {
-            config.jdaCommandConfig
-        }
-    }
+open class KaddyBaseCommand(val bot: KaddyBot) : BaseCommand() {
+
 }

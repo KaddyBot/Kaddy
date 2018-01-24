@@ -19,6 +19,7 @@
 package kaddy
 
 import ch.qos.logback.classic.Level
+import co.aikar.commands.ConditionFailedException
 import co.aikar.commands.JDACommandManager
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
@@ -26,18 +27,19 @@ import dtmlibs.config.datasource.DataHandlingException
 import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
 import dtmlibs.logging.logger
-import kaddy.commands.UpdateCommand
+import kaddy.commands.BotManagementCommands
 import kaddy.listeners.GeneralListener
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.MessageChannel
+import net.dv8tion.jda.core.entities.User
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Scanner
 
-class KaddyBot private constructor (private val discordAPI: JDA, val config: Config) : Kaddy by KaddyImpl(discordAPI) {
+class KaddyBot private constructor (internal val discordAPI: JDA, val config: Config) : Kaddy by KaddyImpl(discordAPI) {
 
     private class BotArgs(parser: ArgParser) {
         val devMode by parser.flagging("-d", "--dev-mode",
@@ -100,7 +102,19 @@ class KaddyBot private constructor (private val discordAPI: JDA, val config: Con
     val commandManager: JDACommandManager = JDACommandManager(discordAPI, config.jdaCommandConfig,
             KaddyCommandConfigProvider(config), null)
 
+    val botOwner: User = if (discordAPI.accountType == AccountType.BOT) {
+        discordAPI.asBot().applicationInfo.complete().owner
+    } else {
+        discordAPI.selfUser
+    }
+
     init {
+        commandManager.commandConditions.addCondition("owneronly", { context ->
+            if (context.issuer.event.author !== botOwner) {
+                throw ConditionFailedException("Must be bot owner")
+            }
+        })
+
         Logging.setRootLogLevel(Level.TRACE)
     }
 
@@ -117,10 +131,11 @@ class KaddyBot private constructor (private val discordAPI: JDA, val config: Con
                 home?.sendMessage("I couldn't delete the shutdown file!")
             }
         }
+        registerCommands()
     }
 
     private fun registerCommands() {
-
+        commandManager.registerCommand(BotManagementCommands(this))
     }
 
     internal fun disconnect() {
@@ -130,6 +145,7 @@ class KaddyBot private constructor (private val discordAPI: JDA, val config: Con
 
     internal fun attemptUpdate(channel: MessageChannel) {
         logger.info("Attempting update...")
+        channel.sendMessage("Attemping update...").queue()
         Thread({
             channel.sendMessage("Pulling changes...").queue()
             val updateProcess = ProcessBuilder().command("git", "pull").start()
@@ -153,5 +169,14 @@ class KaddyBot private constructor (private val discordAPI: JDA, val config: Con
             logger.info("Restarting...")
             disconnect()
         }).start()
+    }
+
+
+    internal fun queueIfOwner(user: User, action: () -> Unit) {
+        discordAPI.asBot().applicationInfo.queue({
+            if (it.owner == user) {
+                action()
+            }
+        })
     }
 }
