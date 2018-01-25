@@ -60,7 +60,7 @@ class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
             bot.config.load()
         } catch (e: DataHandlingException) {
             e.printStackTrace()
-            event.channel.sendMessage("There was an error reloading the config: ${e.message}")
+            event.channel.sendMessage("There was an error reloading the config: ${e.message}").queue()
         }
         event.channel.sendMessage("Reloaded configuration.").queue()
     }
