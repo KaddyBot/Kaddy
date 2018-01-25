@@ -27,11 +27,12 @@ import dtmlibs.logging.Logging
 import dtmlibs.logging.logback.setRootLogLevel
 import dtmlibs.logging.logger
 import kaddy.commands.BotManagementCommands
+import kaddy.data.Tables
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.MessageChannel
-import net.dv8tion.jda.core.entities.User
+import org.jetbrains.exposed.sql.Database
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -71,8 +72,8 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
                 e.printStackTrace()
             }
 
-            connectDatabase(config)
-            createTables()
+            Database.connect("jdbc:h2:file:${config.configDir}/database", "org.h2.Driver")
+            Tables.createIfNonExistent()
 
             bot = KaddyBot(JDABuilder(AccountType.BOT).setToken(botArgs.token).buildBlocking(), config)
 
@@ -102,7 +103,7 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
     }
 
     val commandManager: JDACommandManager by lazy {
-        JDACommandManager(discordAPI, config.jdaCommandConfig, KaddyCommandConfigProvider(config), null)
+        JDACommandManager(discordAPI, config, KaddyCommandConfigProvider(), null)
     }
 
     init {
@@ -161,14 +162,5 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
             logger.info("Restarting...")
             disconnect()
         }).start()
-    }
-
-
-    internal fun queueIfOwner(user: User, action: () -> Unit) {
-        discordAPI.asBot().applicationInfo.queue({
-            if (it.owner == user) {
-                action()
-            }
-        })
     }
 }

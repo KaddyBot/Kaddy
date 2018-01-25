@@ -23,12 +23,10 @@ import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Subcommand
 import dtmlibs.config.datasource.DataHandlingException
 import dtmlibs.logging.logger
-import kaddy.Guilds
 import kaddy.KaddyBot
+import kaddy.data.GuildData
 import kaddy.util.queueReply
-import net.dv8tion.jda.core.entities.ChannelType
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.IOException
 import java.nio.file.Files
 
@@ -71,8 +69,13 @@ class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
     @Subcommand("setprefix")
     @Conditions("owneronly|guildonly")
     fun setPrefix(event: MessageReceivedEvent, prefix: String) {
-        Guilds.setCommandPrefix(event.guild.idLong, prefix)
-        event.queueReply("I have changed the command prefix to '$prefix' for this guild.")
+        try {
+            GuildData.Companion.forGuild(event.guild).commandPrefix = prefix
+            event.queueReply("I have changed the command prefix to `$prefix` for this guild.")
+        } catch (e: IllegalArgumentException) {
+            event.queueReply("Sorry, the max length for a prefix is ${GuildData.MAX_PREFIX_LENGTH} characters.")
+        }
+
     }
 
     @Subcommand("ping")

@@ -18,6 +18,7 @@
  */
 package kaddy
 
+import co.aikar.commands.CommandConfig
 import co.aikar.commands.JDACommandConfig
 import dtmlibs.config.annotation.Comment
 import dtmlibs.config.datasource.DataHandlingException
@@ -32,7 +33,7 @@ import java.nio.file.Paths
 class Config(@Transient val configDir: Path = Paths.get(System.getProperty("user.home"), ".kaddy"),
              @Transient val configFile: Path = configDir.resolve(Paths.get("kaddy.conf")),
              @Transient private val dataSource: DataSource = HoconDataSource.builder().setPath(configFile).build())
-    : PropertiesWrapper() {
+    : PropertiesWrapper(), CommandConfig {
 
     fun isFileCreated(): Boolean = Files.exists(configFile)
 
@@ -63,11 +64,13 @@ class Config(@Transient val configDir: Path = Paths.get(System.getProperty("user
 
     @Comment("The command prefix that will be used if a more specific one has not been set for the context.")
     var defaultCommandPrefix: String = ">"
+        set(value) {
+            field = value
+            acfPrefixList = listOf(value)
+        }
 
     @Transient
-    val jdaCommandConfig: JDACommandConfig = BaseCommandConfig(this)
+    private var acfPrefixList: List<String> = listOf(defaultCommandPrefix)
 
-    private class BaseCommandConfig(private val config: Config) : JDACommandConfig() {
-        override fun getStartsWith(): String = config.defaultCommandPrefix
-    }
+    override fun getCommandPrefixes(): List<String> = acfPrefixList
 }

@@ -16,13 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Kaddy.  If not, see <http://www.gnu.org/licenses/>.
  */
-package kaddy
+package kaddy.data
 
-import co.aikar.commands.CommandConfig
-import co.aikar.commands.CommandConfigProvider
-import kaddy.data.GuildData
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import org.jetbrains.exposed.sql.SchemaUtils.create
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.transaction
 
-internal class KaddyCommandConfigProvider : CommandConfigProvider {
-    override fun provide(event: MessageReceivedEvent): CommandConfig = GuildData.forGuild(event.guild)
+internal object Tables {
+    internal fun createIfNonExistent() {
+        transaction {
+            create(Users, Guilds)
+        }
+    }
+}
+
+internal object Users : Table() {
+    val id = long("id").primaryKey()
+}
+
+internal object Guilds : Table() {
+    val id = long("id").primaryKey()
+    val commandPrefix = varchar("commandPrefix", GuildData.MAX_PREFIX_LENGTH).nullable()
 }
