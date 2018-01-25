@@ -19,7 +19,6 @@
 package kaddy
 
 import ch.qos.logback.classic.Level
-import co.aikar.commands.ConditionFailedException
 import co.aikar.commands.JDACommandManager
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
@@ -70,6 +69,9 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
                 logger.error { "Could not load config file." }
                 e.printStackTrace()
             }
+
+            connectDatabase(config)
+            createTables()
 
             bot = KaddyBot(JDABuilder(AccountType.BOT).setToken(botArgs.token).buildBlocking(), config)
 

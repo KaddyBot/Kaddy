@@ -29,8 +29,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class Config(@Transient private val configDir: Path = Paths.get(System.getProperty("user.home"), ".kaddy"),
-             @Transient private val configFile: Path = configDir.resolve(Paths.get("kaddy.conf")),
+class Config(@Transient val configDir: Path = Paths.get(System.getProperty("user.home"), ".kaddy"),
+             @Transient val configFile: Path = configDir.resolve(Paths.get("kaddy.conf")),
              @Transient private val dataSource: DataSource = HoconDataSource.builder().setPath(configFile).build())
     : PropertiesWrapper() {
 
