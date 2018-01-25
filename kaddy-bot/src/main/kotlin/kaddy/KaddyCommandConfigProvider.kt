@@ -23,12 +23,26 @@ import co.aikar.commands.JDACommandConfig
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 internal class KaddyCommandConfigProvider(private val config: Config) : CommandConfigProvider {
+
     override fun provide(event: MessageReceivedEvent): JDACommandConfig {
-        val guildConfig = config.guilds[event.guild.idLong]
-        return if (guildConfig != null) {
-            guildConfig.jdaCommandConfig
-        } else {
-            config.jdaCommandConfig
+        GuildCommandConfig.guildId.set(event.guild.idLong)
+        return GuildCommandConfig
+    }
+
+    object GuildCommandConfig : JDACommandConfig() {
+        val guildId: ThreadLocal<Long> = ThreadLocal()
+
+        override fun setStartsWith(startsWith: String) {
+            Guilds.setCommandPrefix(guildId.get(), startsWith)
+        }
+
+        override fun getStartsWith(): String {
+            val result: String? = Guilds.getCommandPrefix(guildId.get())
+            if (result == null) {
+                return KaddyBot.config.defaultCommandPrefix
+            } else {
+                return result
+            }
         }
     }
 }

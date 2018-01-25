@@ -18,6 +18,11 @@
  */
 package kaddy.util
 
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.MessageChannel
+import net.dv8tion.jda.core.entities.MessageEmbed
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+
 inline fun <T : AutoCloseable, R> T.use(block: (T) -> R): R {
     var closed = false
     try {
@@ -35,4 +40,28 @@ inline fun <T : AutoCloseable, R> T.use(block: (T) -> R): R {
             close()
         }
     }
+}
+
+fun MessageChannel.queueMessage(message: CharSequence) {
+    this.sendMessage(message).queue()
+}
+
+fun MessageChannel.queueMessage(message: Message) {
+    this.sendMessage(message).queue()
+}
+
+fun MessageChannel.queueMessage(message: MessageEmbed) {
+    this.sendMessage(message).queue()
+}
+
+fun MessageReceivedEvent.queueReply(message: CharSequence) {
+    this.channel.sendMessage(message).queue()
+}
+
+fun MessageReceivedEvent.queueReply(message: Message) {
+    this.channel.sendMessage(message).queue()
+}
+
+fun MessageReceivedEvent.queueReply(message: MessageEmbed) {
+    this.channel.sendMessage(message).queue()
 }

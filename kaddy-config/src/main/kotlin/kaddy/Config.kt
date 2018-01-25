@@ -67,20 +67,6 @@ class Config(@Transient val configDir: Path = Paths.get(System.getProperty("user
     @Transient
     val jdaCommandConfig: JDACommandConfig = BaseCommandConfig(this)
 
-    val guilds: MutableMap<Long, GuildConfig> = mutableMapOf()
-
-    class GuildConfig {
-        @Comment("The command prefix for commands in this guild")
-        var commandPrefix: String = ">"
-
-        @Transient
-        val jdaCommandConfig: JDACommandConfig = GuildCommandConfig(this)
-
-        private class GuildCommandConfig(private val guildConfig: Config.GuildConfig) : JDACommandConfig() {
-            override fun getStartsWith(): String = guildConfig.commandPrefix
-        }
-    }
-
     private class BaseCommandConfig(private val config: Config) : JDACommandConfig() {
         override fun getStartsWith(): String = config.defaultCommandPrefix
     }

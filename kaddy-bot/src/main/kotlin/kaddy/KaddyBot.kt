@@ -49,6 +49,7 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
 
     companion object {
         private lateinit var bot: KaddyBot
+        val config: Config by lazy { bot.config }
 
         internal val botStopPath: Path = Paths.get("./.bot-stop");
         internal val windows = System.getProperty("os.name").startsWith("Windows")
@@ -156,7 +157,7 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
                 logger.error("Could not build.")
                 return@Thread
             }
-            //channel.sendMessage("Restarting...").complete()
+            channel.sendMessage("Restarting...").complete()
             logger.info("Restarting...")
             disconnect()
         }).start()

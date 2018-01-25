@@ -23,13 +23,16 @@ import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Subcommand
 import dtmlibs.config.datasource.DataHandlingException
 import dtmlibs.logging.logger
+import kaddy.Guilds
 import kaddy.KaddyBot
+import kaddy.util.queueReply
+import net.dv8tion.jda.core.entities.ChannelType
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.IOException
 import java.nio.file.Files
 
 @CommandAlias("bot")
-@Conditions("owneronly")
 class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
 
     @Subcommand("update")
@@ -63,6 +66,13 @@ class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
             event.channel.sendMessage("There was an error reloading the config: ${e.message}").queue()
         }
         event.channel.sendMessage("Reloaded configuration.").queue()
+    }
+
+    @Subcommand("setprefix")
+    @Conditions("owneronly|guildonly")
+    fun setPrefix(event: MessageReceivedEvent, prefix: String) {
+        Guilds.setCommandPrefix(event.guild.idLong, prefix)
+        event.queueReply("I have changed the command prefix to '$prefix' for this guild.")
     }
 
     @Subcommand("ping")
