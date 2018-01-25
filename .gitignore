@@ -50,3 +50,7 @@ libs/
 runtime/
 .bot-stop
 *.jar
+java_pid310.hprof
+kaddy-bot/build/
+kaddy-config/build/
+kaddy-daemon/build/
