@@ -70,7 +70,12 @@ class Config(@Transient val configDir: Path = Paths.get(System.getProperty("user
         }
 
     @Transient
-    private var acfPrefixList: List<String> = listOf(defaultCommandPrefix)
+    private lateinit var acfPrefixList: List<String>
 
-    override fun getCommandPrefixes(): List<String> = acfPrefixList
+    override fun getCommandPrefixes(): List<String> {
+        if (!::acfPrefixList.isInitialized) {
+            acfPrefixList = listOf(defaultCommandPrefix)
+        }
+        return acfPrefixList
+    }
 }

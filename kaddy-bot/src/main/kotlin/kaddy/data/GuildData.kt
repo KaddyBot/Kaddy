@@ -21,6 +21,7 @@ package kaddy.data
 import co.aikar.commands.CommandConfig
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
+import kaddy.KaddyBot
 import net.dv8tion.jda.core.entities.Guild
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -30,22 +31,28 @@ import java.util.concurrent.TimeUnit
 
 class GuildData private constructor(val guildId: Long) : CommandConfig {
 
-    private var acfPrefixList: List<String> = listOf()
+    private lateinit var acfPrefixList: List<String>
 
     var commandPrefix: String? = null
         @Throws(IllegalArgumentException::class)
         set(value) {
             field = value
+            setCommandPrefix(guildId, value)
             if (value != null) {
                 acfPrefixList = listOf(value)
             } else {
                 acfPrefixList = listOf()
             }
-            setCommandPrefix(guildId, value)
         }
 
     override fun getCommandPrefixes(): List<String> {
-        return if (commandPrefix != null) listOf(commandPrefix as String) else listOf()
+        if (!::acfPrefixList.isInitialized) {
+            acfPrefixList = if (commandPrefix != null) listOf(commandPrefix as String) else listOf()
+        }
+        if (acfPrefixList.isEmpty()) {
+            return KaddyBot.config.commandPrefixes
+        }
+        return acfPrefixList
     }
 
     companion object {
@@ -63,7 +70,7 @@ class GuildData private constructor(val guildId: Long) : CommandConfig {
             return guildDataCache.get(guildId, {
                 val guildData = GuildData(guildId)
                 transaction {
-                    val result = Guilds.select { Guilds.id eq guildId }.limit(1).elementAtOrNull(1)
+                    val result = Guilds.select { Guilds.id eq guildId }.singleOrNull()
                     if (result != null) {
                         guildData.commandPrefix = result[Guilds.commandPrefix]
                     } else {
@@ -78,7 +85,7 @@ class GuildData private constructor(val guildId: Long) : CommandConfig {
 
         private fun setCommandPrefix(guildId: Long, commandPrefix: String?) {
             val prefix = if (commandPrefix != null && commandPrefix.length > MAX_PREFIX_LENGTH) {
-                commandPrefix.substring(0, MAX_PREFIX_LENGTH)
+                throw IllegalArgumentException("The prefix exceeds the max length of $MAX_PREFIX_LENGTH")
             } else {
                 commandPrefix
             }

@@ -54,6 +54,13 @@ class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
         bot.disconnect()
     }
 
+    @Subcommand("restart")
+    @Conditions("owneronly")
+    fun restart(event: MessageReceivedEvent) {
+        event.queueReply("Restarting...")
+        bot.disconnect()
+    }
+
     @Subcommand("reload|reloadconfig")
     @Conditions("owneronly")
     fun reload(event: MessageReceivedEvent) {
@@ -66,7 +73,7 @@ class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
         event.channel.sendMessage("Reloaded configuration.").queue()
     }
 
-    @Subcommand("setprefix")
+    @Subcommand("setprefix|prefix")
     @Conditions("owneronly|guildonly")
     fun setPrefix(event: MessageReceivedEvent, prefix: String) {
         try {
