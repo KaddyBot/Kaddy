@@ -91,4 +91,12 @@ class BotManagementCommands(bot: KaddyBot) : KaddyBaseCommand(bot) {
         logger.info("Received ping command")
         event.channel.sendMessage("pong").queue()
     }
+
+    @Subcommand("invite|invitelink")
+    @Conditions("owneronly")
+    fun inviteLink(event: MessageReceivedEvent) {
+        event.author.openPrivateChannel().queue({
+            it.sendMessage(bot.discordAPI.asBot().getInviteUrl()).queue()
+        })
+    }
 }
