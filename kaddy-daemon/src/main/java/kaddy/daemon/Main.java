@@ -60,7 +60,7 @@ public class Main {
 //                if (build.waitFor() != 0) {
 //                    break;
 //                }
-                Process prepare = new ProcessBuilder(windows ? "gradlew.bat" : "./gradlew", "configureDependencies", "configureRuntime").inheritIO().start();
+                Process prepare = new ProcessBuilder(windows ? "gradlew.bat" : "./gradlew", "configureDependencies", "configureRuntime", "configureSamplePlugins").inheritIO().start();
                 if (prepare.waitFor() != 0) {
                     break;
                 }

@@ -34,6 +34,9 @@ subprojects {
         maven {
             url 'https://repo.aikar.co/nexus/content/repositories/aikar/'
         }
+        maven {
+            url 'https://dl.bintray.com/kotlin/exposed/'
+        }
     }
 
     dependencies {
@@ -87,12 +90,6 @@ project (':kaddy-config') {
 }
 
 project(':kaddy-bot') {
-    repositories {
-        maven {
-            url 'https://dl.bintray.com/kotlin/exposed/'
-        }
-    }
-
     dependencies {
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
         compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
@@ -105,7 +102,7 @@ project(':kaddy-bot') {
         compile project(':kaddy-config')
         compile 'com.h2database:h2:1.4.196'
         compile 'org.jetbrains.exposed:exposed:0.9.1'
-        compile 'org.pf4j:pf4j:2.1.0'
+        compile 'com.github.plugkit:plugkit:1.0-SNAPSHOT'
 
         testCompile group: 'junit', name: 'junit', version:'4.12'
         testCompile group: 'org.powermock', name: 'powermock-module-junit4', version:'1.6.1'
@@ -140,7 +137,18 @@ project(':kaddy-bot') {
         into "${project.rootDir}/runtime"
     }
 
-    task start(type: JavaExec, dependsOn: [configureDependencies, configureRuntime]) {
+    task deleteSamplePlugins(type: Delete) {
+        delete "${project.rootDir}/plugins" // TODO This needs to be fixed so as to not delete all plugins
+    }
+
+    task configureSamplePlugins(type: Copy, dependsOn: deleteSamplePlugins) {
+        from("${project.rootDir}/kaddy-sample-plugin/build/libs/") {
+            exclude '*-sources.jar'
+        }
+        into "${project.rootDir}/plugins"
+    }
+
+    task start(type: JavaExec, dependsOn: [configureDependencies, configureRuntime, configureSamplePlugins]) {
         doFirst {
             if (!new File("${project.rootDir}/runtime").exists()) {
                 throw new GradleException("runtime missing")
@@ -185,5 +193,17 @@ project(':kaddy-daemon') {
                     'Main-Class': 'kaddy.daemon.Main'
             )
         }
+    }
+}
+
+project(':kaddy-sample-plugin') {
+    dependencies {
+        compileOnly project(':kaddy-bot')
+    }
+
+    task copySample(type: Copy) {
+        dependsOn build
+        from jar
+        into "${project.rootDir}/plugins"
     }
 }

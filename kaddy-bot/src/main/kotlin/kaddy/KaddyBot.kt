@@ -11,6 +11,8 @@ package kaddy
 
 import ch.qos.logback.classic.Level
 import co.aikar.commands.JDACommandManager
+import com.github.plugkit.plugin.Plugin
+import com.github.plugkit.plugin.SimplePluginManager
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import dtmlibs.config.datasource.DataHandlingException
@@ -19,6 +21,7 @@ import dtmlibs.logging.logback.setRootLogLevel
 import dtmlibs.logging.logger
 import kaddy.commands.BotManagementCommands
 import kaddy.data.Tables
+import kaddy.plugin.JarPluginLoader
 import kaddy.util.completeMessage
 import kaddy.util.queueMessage
 import net.dv8tion.jda.core.AccountType
@@ -29,8 +32,7 @@ import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.ReadyEvent
 import net.dv8tion.jda.core.hooks.EventListener
 import org.jetbrains.exposed.sql.Database
-import org.pf4j.DefaultPluginManager
-import org.pf4j.PluginManager
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -95,8 +97,6 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
         }
     }
 
-    val pluginManager: PluginManager = DefaultPluginManager()
-
     val home by lazy {
         textChannels[352502441838903296]
     }
@@ -118,9 +118,7 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
     private fun botReady() {
         validateLastShutdown()
         registerCommands()
-
-        pluginManager.loadPlugins()
-        pluginManager.startPlugins()
+        startPlugins()
 
         home.queueMessage("Hello!")
     }
@@ -142,8 +140,41 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
         commandManager.registerCommand(BotManagementCommands(this))
     }
 
+    private fun startPlugins() {
+        try {
+            pluginManager.registerInterface(JarPluginLoader::class.java)
+            enablePlugins(loadPlugins())
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun loadPlugins(): List<Plugin<Kaddy>?> {
+        val pluginsDir = Paths.get("plugins")
+        Files.createDirectories(pluginsDir)
+
+        val loadedPlugins = mutableListOf<Plugin<Kaddy>?>()
+
+        for (file in  pluginsDir.toFile().listFiles()) {
+            val p = pluginManager.loadPlugin(file)
+            loadedPlugins.add(p)
+        }
+
+        return loadedPlugins
+    }
+
+    private fun enablePlugins(loadedPlugins: List<Plugin<Kaddy>?>) {
+        for (plugin in loadedPlugins) {
+            try {
+                pluginManager.enablePlugin(plugin ?: throw IllegalArgumentException())
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     internal fun disconnect() {
-        pluginManager.stopPlugins()
+        pluginManager as SimplePluginManager
         home.completeMessage("Good bye!")
         discordAPI.shutdown()
     }

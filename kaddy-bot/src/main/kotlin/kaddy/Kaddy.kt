@@ -9,7 +9,9 @@
  */
 package kaddy
 
-import dtmlibs.logging.LogOwner
+import com.github.plugkit.PluginHost
+import com.github.plugkit.plugin.PluginManager
+import com.github.plugkit.plugin.SimplePluginManager
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.entities.Category
 import net.dv8tion.jda.core.entities.Emote
@@ -23,7 +25,12 @@ import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.requests.restaction.GuildAction
 
-interface Kaddy : LogOwner {
+interface Kaddy : PluginHost {
+
+    /**
+     * The plugin manager for the bot.
+     */
+    val pluginManager: PluginManager<Kaddy>
 
     fun createGuild(name: CharSequence): GuildAction
 

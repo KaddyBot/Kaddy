@@ -9,6 +9,8 @@
  */
 package kaddy
 
+import com.github.plugkit.plugin.PluginManager
+import com.github.plugkit.plugin.SimplePluginManager
 import dtmlibs.logging.LogOwner
 import dtmlibs.logging.Loggable
 import kaddy.util.KaddyLoggable
@@ -30,6 +32,8 @@ internal class KaddyImpl(internal val api: JDA) : Kaddy, Loggable by KaddyLoggab
 
     override val logOwner: Class<out LogOwner>
         get() = KaddyLoggable.logOwner
+
+    override val pluginManager = SimplePluginManager(this, Kaddy::class.java)
 
     override val ping: Long
         get() = api.ping
