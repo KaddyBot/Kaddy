@@ -33,10 +33,13 @@ class GuildData private constructor(val guildId: Long) : CommandConfig {
 
     private lateinit var acfPrefixList: List<String>
 
-    var commandPrefix: String? = null
+    private var _commandPrefix: String? = null
+
+    var commandPrefix: String?
+        get() = _commandPrefix
         @Throws(IllegalArgumentException::class)
         set(value) {
-            field = value
+            _commandPrefix = value
             setCommandPrefix(guildId, value)
             if (value != null) {
                 acfPrefixList = listOf(value)
@@ -72,7 +75,7 @@ class GuildData private constructor(val guildId: Long) : CommandConfig {
                 transaction {
                     val result = Guilds.select { Guilds.id eq guildId }.singleOrNull()
                     if (result != null) {
-                        guildData.commandPrefix = result[Guilds.commandPrefix]
+                        guildData._commandPrefix = result[Guilds.commandPrefix]
                     } else {
                         Guilds.insert {
                             it[id] = guildId
