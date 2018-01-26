@@ -33,16 +33,28 @@ inline fun <T : AutoCloseable, R> T.use(block: (T) -> R): R {
     }
 }
 
-fun MessageChannel.queueMessage(message: CharSequence) {
-    this.sendMessage(message).queue()
+fun MessageChannel?.queueMessage(message: CharSequence) {
+    this?.sendMessage(message)?.queue()
 }
 
-fun MessageChannel.queueMessage(message: Message) {
-    this.sendMessage(message).queue()
+fun MessageChannel?.queueMessage(message: Message) {
+    this?.sendMessage(message)?.queue()
 }
 
-fun MessageChannel.queueMessage(message: MessageEmbed) {
-    this.sendMessage(message).queue()
+fun MessageChannel?.queueMessage(message: MessageEmbed) {
+    this?.sendMessage(message)?.queue()
+}
+
+fun MessageChannel?.completeMessage(message: CharSequence) {
+    this?.sendMessage(message)?.complete()
+}
+
+fun MessageChannel?.completeMessage(message: Message) {
+    this?.sendMessage(message)?.complete()
+}
+
+fun MessageChannel?.completeMessage(message: MessageEmbed) {
+    this?.sendMessage(message)?.complete()
 }
 
 fun MessageReceivedEvent.queueReply(message: CharSequence) {

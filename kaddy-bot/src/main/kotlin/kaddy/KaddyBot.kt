@@ -19,17 +19,25 @@ import dtmlibs.logging.logback.setRootLogLevel
 import dtmlibs.logging.logger
 import kaddy.commands.BotManagementCommands
 import kaddy.data.Tables
+import kaddy.util.completeMessage
+import kaddy.util.queueMessage
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.MessageChannel
+import net.dv8tion.jda.core.events.Event
+import net.dv8tion.jda.core.events.ReadyEvent
+import net.dv8tion.jda.core.hooks.EventListener
 import org.jetbrains.exposed.sql.Database
+import org.pf4j.DefaultPluginManager
+import org.pf4j.PluginManager
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.Scanner
 
-class KaddyBot private constructor (internal val discordAPI: JDA, val config: Config) : Kaddy by KaddyImpl(discordAPI) {
+class KaddyBot private constructor (internal val discordAPI: JDA, val config: Config)
+    : Kaddy by KaddyImpl(discordAPI), EventListener {
 
     private class BotArgs(parser: ArgParser) {
         val devMode by parser.flagging("-d", "--dev-mode",
@@ -68,8 +76,6 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
 
             bot = KaddyBot(JDABuilder(AccountType.BOT).setToken(botArgs.token).buildBlocking(), config)
 
-            bot.connect()
-
             if (botArgs.devMode) {
                 val input = Scanner(System.`in`)
 
@@ -89,6 +95,8 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
         }
     }
 
+    val pluginManager: PluginManager = DefaultPluginManager()
+
     val home by lazy {
         textChannels[352502441838903296]
     }
@@ -101,21 +109,33 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
         Logging.setRootLogLevel(Level.TRACE)
     }
 
-    private fun connect() {
+    override fun onEvent(event: Event?) {
+        if (event is ReadyEvent) {
+            botReady()
+        }
+    }
+
+    private fun botReady() {
+        validateLastShutdown()
+        registerCommands()
+
+        pluginManager.loadPlugins()
+        pluginManager.startPlugins()
+
+        home.queueMessage("Hello!")
+    }
+
+    private fun validateLastShutdown() {
         if (Files.exists(botStopPath)) {
-            home?.sendMessage("The shutdown file was present when I started. This means I probably wasn't " +
-                    "suppose to be started.")?.queue()
+            home.queueMessage("The shutdown file was present when I started. This means I probably wasn't " +
+                    "suppose to be started.")
             try {
                 Files.delete(botStopPath)
             } catch (e: Exception) {
                 e.printStackTrace()
-                home?.sendMessage("I couldn't delete the shutdown file!")
+                home.queueMessage("I couldn't delete the shutdown file!")
             }
         }
-
-        registerCommands()
-
-        home?.sendMessage("Hello!")?.queue()
     }
 
     private fun registerCommands() {
@@ -123,7 +143,8 @@ class KaddyBot private constructor (internal val discordAPI: JDA, val config: Co
     }
 
     internal fun disconnect() {
-        home?.sendMessage("Good bye!")?.complete()
+        pluginManager.stopPlugins()
+        home.completeMessage("Good bye!")
         discordAPI.shutdown()
     }
 
